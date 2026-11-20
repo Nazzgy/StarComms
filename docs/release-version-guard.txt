@@ -1,0 +1,9 @@
+F:\github\StarComms\Directory.Build.props(1,741): error : Release requires BuildId yyyyMMdd.HHmmss (UTC). [F:\github\StarComms\src\StarComms.Core\StarComms.Core.csproj]
+
+Sestaven├ş SE NEZDA┼śILO.
+
+F:\github\StarComms\Directory.Build.props(1,741): error : Release requires BuildId yyyyMMdd.HHmmss (UTC). [F:\github\StarComms\src\StarComms.Core\StarComms.Core.csproj]
+    0 upozorn─Ťn├ş
+    Po─Źet chyb: 1
+
+Uplynul├Ż ─Źas 00:00:00.28

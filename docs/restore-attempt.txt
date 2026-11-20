@@ -1,0 +1,31 @@
+  Zji┼í┼ąuj├ş se projekty, kter├ę se maj├ş obnovit...
+F:\github\StarComms\src\StarComms.App\StarComms.App.csproj : warning NU1510: PackageReference System.Security.Cryptography.ProtectedData se nevy┼Öad├ş. Tento bal├ş─Źek je automaticky dostupn├Ż a nen├ş pot┼Öeba na n─Ťj explicitn─Ť odkazovat. Odeberte polo┼żku PackageReference. [F:\github\StarComms\StarComms.slnx]
+F:\github\StarComms\src\StarComms.App\StarComms.App.csproj : error NU1301: Nepovedlo se na─Ź├şst index slu┼żby pro zdroj https://api.nuget.org/v3/index.json. [F:\github\StarComms\StarComms.slnx]
+F:\github\StarComms\src\StarComms.App\StarComms.App.csproj : error NU1301:   Nen├ş zn├ím ┼ż├ídn├Ż takov├Ż hostitel. (api.nuget.org:443) [F:\github\StarComms\StarComms.slnx]
+F:\github\StarComms\src\StarComms.App\StarComms.App.csproj : error NU1301:   Nen├ş zn├ím ┼ż├ídn├Ż takov├Ż hostitel. [F:\github\StarComms\StarComms.slnx]
+F:\github\StarComms\src\StarComms.App\StarComms.App.csproj : error NU1301: Nepovedlo se na─Ź├şst index slu┼żby pro zdroj https://api.nuget.org/v3/index.json. [F:\github\StarComms\StarComms.slnx]
+F:\github\StarComms\src\StarComms.App\StarComms.App.csproj : error NU1301:   Nen├ş zn├ím ┼ż├ídn├Ż takov├Ż hostitel. (api.nuget.org:443) [F:\github\StarComms\StarComms.slnx]
+F:\github\StarComms\src\StarComms.App\StarComms.App.csproj : error NU1301:   Nen├ş zn├ím ┼ż├ídn├Ż takov├Ż hostitel. [F:\github\StarComms\StarComms.slnx]
+F:\github\StarComms\src\StarComms.App\StarComms.App.csproj : error NU1301: Nepovedlo se na─Ź├şst index slu┼żby pro zdroj https://api.nuget.org/v3/index.json. [F:\github\StarComms\StarComms.slnx]
+F:\github\StarComms\src\StarComms.App\StarComms.App.csproj : error NU1301:   Nen├ş zn├ím ┼ż├ídn├Ż takov├Ż hostitel. (api.nuget.org:443) [F:\github\StarComms\StarComms.slnx]
+F:\github\StarComms\src\StarComms.App\StarComms.App.csproj : error NU1301:   Nen├ş zn├ím ┼ż├ídn├Ż takov├Ż hostitel. [F:\github\StarComms\StarComms.slnx]
+  Obnoven├ş projektu F:\github\StarComms\src\StarComms.App\StarComms.App.csproj (v 16,67 s) bylo ne├║sp─Ť┼ín├ę.
+F:\github\StarComms\src\StarComms.App\StarComms.App.csproj : error NU1301: Nepovedlo se na─Ź├şst index slu┼żby pro zdroj https://api.nuget.org/v3/index.json. [F:\github\StarComms\StarComms.slnx]
+F:\github\StarComms\src\StarComms.App\StarComms.App.csproj : error NU1301:   Nen├ş zn├ím ┼ż├ídn├Ż takov├Ż hostitel. (api.nuget.org:443) [F:\github\StarComms\StarComms.slnx]
+F:\github\StarComms\src\StarComms.App\StarComms.App.csproj : error NU1301:   Nen├ş zn├ím ┼ż├ídn├Ż takov├Ż hostitel. [F:\github\StarComms\StarComms.slnx]
+F:\github\StarComms\src\StarComms.Engine\StarComms.Engine.csproj : error NU1301: Nepovedlo se na─Ź├şst index slu┼żby pro zdroj https://api.nuget.org/v3/index.json. [F:\github\StarComms\StarComms.slnx]
+F:\github\StarComms\src\StarComms.Engine\StarComms.Engine.csproj : error NU1301:   Nen├ş zn├ím ┼ż├ídn├Ż takov├Ż hostitel. (api.nuget.org:443) [F:\github\StarComms\StarComms.slnx]
+F:\github\StarComms\src\StarComms.Engine\StarComms.Engine.csproj : error NU1301:   Nen├ş zn├ím ┼ż├ídn├Ż takov├Ż hostitel. [F:\github\StarComms\StarComms.slnx]
+  Obnoven├ş projektu F:\github\StarComms\src\StarComms.Engine\StarComms.Engine.csproj (v 11,08 s) bylo ne├║sp─Ť┼ín├ę.
+  Obnovil se projekt F:\github\StarComms\src\StarComms.Core\StarComms.Core.csproj (v 15 ms).
+F:\github\StarComms\tests\StarComms.Tests\StarComms.Tests.csproj : error NU1301: Nepovedlo se na─Ź├şst index slu┼żby pro zdroj https://api.nuget.org/v3/index.json. [F:\github\StarComms\StarComms.slnx]
+F:\github\StarComms\tests\StarComms.Tests\StarComms.Tests.csproj : error NU1301:   Nen├ş zn├ím ┼ż├ídn├Ż takov├Ż hostitel. (api.nuget.org:443) [F:\github\StarComms\StarComms.slnx]
+F:\github\StarComms\tests\StarComms.Tests\StarComms.Tests.csproj : error NU1301:   Nen├ş zn├ím ┼ż├ídn├Ż takov├Ż hostitel. [F:\github\StarComms\StarComms.slnx]
+F:\github\StarComms\tests\StarComms.Tests\StarComms.Tests.csproj : error NU1301: Nepovedlo se na─Ź├şst index slu┼żby pro zdroj https://api.nuget.org/v3/index.json. [F:\github\StarComms\StarComms.slnx]
+F:\github\StarComms\tests\StarComms.Tests\StarComms.Tests.csproj : error NU1301:   Nen├ş zn├ím ┼ż├ídn├Ż takov├Ż hostitel. (api.nuget.org:443) [F:\github\StarComms\StarComms.slnx]
+F:\github\StarComms\tests\StarComms.Tests\StarComms.Tests.csproj : error NU1301:   Nen├ş zn├ím ┼ż├ídn├Ż takov├Ż hostitel. [F:\github\StarComms\StarComms.slnx]
+  Obnoven├ş projektu F:\github\StarComms\tests\StarComms.Tests\StarComms.Tests.csproj (v 11,25 s) bylo ne├║sp─Ť┼ín├ę.
+F:\github\StarComms\tools\StarComms.Sim\StarComms.Sim.csproj : error NU1301: Nepovedlo se na─Ź├şst index slu┼żby pro zdroj https://api.nuget.org/v3/index.json. [F:\github\StarComms\StarComms.slnx]
+F:\github\StarComms\tools\StarComms.Sim\StarComms.Sim.csproj : error NU1301:   Nen├ş zn├ím ┼ż├ídn├Ż takov├Ż hostitel. (api.nuget.org:443) [F:\github\StarComms\StarComms.slnx]
+F:\github\StarComms\tools\StarComms.Sim\StarComms.Sim.csproj : error NU1301:   Nen├ş zn├ím ┼ż├ídn├Ż takov├Ż hostitel. [F:\github\StarComms\StarComms.slnx]
+  Obnoven├ş projektu F:\github\StarComms\tools\StarComms.Sim\StarComms.Sim.csproj (v 2 ms) bylo ne├║sp─Ť┼ín├ę.

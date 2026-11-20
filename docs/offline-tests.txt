@@ -1,0 +1,48 @@
+  Zji┼í┼ąuj├ş se projekty, kter├ę se maj├ş obnovit...
+  V┼íechny projekty jsou v aktu├íln├şm stavu pro obnoven├ş.
+  StarComms.Core -> F:\github\StarComms\src\StarComms.Core\bin\Debug\net10.0\StarComms.Core.dll
+F:\github\StarComms\src\StarComms.Engine\ControlLink.cs(26,21): warning CS9124: Parametr double capacity je zachycen do stavu nad┼Öazen├ęho typu a jeho hodnota se tak├ę pou┼ż├şv├í k inicializaci pole, vlastnosti nebo ud├ílosti. [F:\github\StarComms\tests\StarComms.Tests\StarComms.Tests.csproj]
+  StarComms.Tests -> F:\github\StarComms\tests\StarComms.Tests\bin\Debug\net10.0\StarComms.Tests.dll
+  StarComms.OfflineRunner -> F:\github\StarComms\tools\StarComms.OfflineRunner\bin\Debug\net10.0\StarComms.OfflineRunner.dll
+
+Vytv├í┼Öen├ş sestaven├ş bylo ├║sp─Ť┼ín─Ť dokon─Źeno.
+
+F:\github\StarComms\src\StarComms.Engine\ControlLink.cs(26,21): warning CS9124: Parametr double capacity je zachycen do stavu nad┼Öazen├ęho typu a jeho hodnota se tak├ę pou┼ż├şv├í k inicializaci pole, vlastnosti nebo ud├ílosti. [F:\github\StarComms\tests\StarComms.Tests\StarComms.Tests.csproj]
+    1 upozorn─Ťn├ş
+    Po─Źet chyb: 0
+
+Uplynul├Ż ─Źas 00:00:05.02
+PASS CON002_Valid 127.0.0.1,49555
+PASS CON002_Valid 127.0.0.1:1234,1234
+PASS CON002_Valid ::1,49555
+PASS CON002_Valid [::1]:49999,49999
+PASS CON002_Invalid 0.0.0.0
+PASS CON002_Invalid ::
+PASS CON002_Invalid 127.0.0.1:0
+PASS CON002_Invalid 127.0.0.1:65536
+PASS CON002_Invalid host.example
+PASS CON002_Invalid [::1]:abc
+PASS CON002_Invalid 224.0.0.1
+PASS CON002_Invalid starcomms://join?v=1&v=1
+PASS CON002_Invalid 127.1
+PASS CON002_Invalid 0x7f000001
+PASS CON002_Invalid 0177.0.0.1
+PASS CON002_Invitation 
+PASS AUTH003_CapacityAndUnicode 
+PASS ROUTE_RoleRevocation 
+PASS ROLE004_TransferRequiresCurrentCaptain 
+PASS ROLE003_DeleteShipClearsRoles 
+PASS PTT002_FirstWins Ship,Command
+PASS PTT002_FirstWins Command,Ship
+PASS PTT003_HeldAcrossDisarm 
+PASS UDP001_AllTamperedBitsRejected 
+PASS UDP002_ReorderingReplayAndBadHighSequence 
+PASS UDP003_ConcurrentNonceUniqueness 
+PASS UDP005_BoundedMalformedPackets 
+PASS UDP007_EndBeforeVoiceAndGenerationReset 
+PASS TCP001_OneByteReadsAndMultipleFrames 
+PASS TCP001_InvalidLength 0
+PASS TCP001_InvalidLength 65537
+PASS TLS001_ExactPin 
+PASS VER001_CentralVersion 
+Passed=33 Failed=0. Direct invocation of xUnit test methods; no VSTest socket required.

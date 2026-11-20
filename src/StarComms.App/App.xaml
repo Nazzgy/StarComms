@@ -1,0 +1,12 @@
+<Application ThemeMode="Dark" x:Class="StarComms.App.App" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+ <Application.Resources>
+  <BooleanToVisibilityConverter x:Key="Visible"/>
+  <Style x:Key="AppWindow" TargetType="Window"><Setter Property="Background" Value="#17191D"/><Setter Property="Foreground" Value="#F4F5F6"/><Setter Property="FontFamily" Value="Segoe UI"/><Setter Property="FontSize" Value="15"/></Style>
+  <Style TargetType="TextBlock"><Setter Property="TextWrapping" Value="Wrap"/><Setter Property="Margin" Value="0,4"/></Style>
+  <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}"><Setter Property="MinHeight" Value="40"/><Setter Property="Padding" Value="18,8"/><Setter Property="Margin" Value="4"/><Setter Property="Background" Value="#30343B"/><Setter Property="Foreground" Value="#F4F5F6"/><Setter Property="BorderBrush" Value="#606773"/><Setter Property="Cursor" Value="Hand"/></Style>
+  <Style x:Key="Primary" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}"><Setter Property="Background" Value="#79D9E1"/><Setter Property="Foreground" Value="#17191D"/><Setter Property="FontWeight" Value="SemiBold"/></Style>
+  <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}"><Setter Property="Background" Value="#17191D"/><Setter Property="Foreground" Value="#F4F5F6"/><Setter Property="BorderBrush" Value="#606773"/><Setter Property="Padding" Value="12"/><Setter Property="MinHeight" Value="44"/><Setter Property="Margin" Value="0,4,0,12"/><Setter Property="CaretBrush" Value="White"/></Style>
+  <Style TargetType="ListBox" BasedOn="{StaticResource {x:Type ListBox}}"><Setter Property="Background" Value="#22252A"/><Setter Property="Foreground" Value="#F4F5F6"/><Setter Property="BorderThickness" Value="0"/><Setter Property="Padding" Value="8"/></Style>
+  <Style x:Key="Panel" TargetType="Border"><Setter Property="Background" Value="#22252A"/><Setter Property="CornerRadius" Value="14"/><Setter Property="Padding" Value="24"/><Setter Property="Margin" Value="8"/></Style>
+ </Application.Resources>
+</Application>

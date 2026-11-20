@@ -1,0 +1,53 @@
+Passed StarComms.Tests.CoreTests.CON002_Invalid(input: "0.0.0.0")
+Passed StarComms.Tests.LoggingTests.UnwritableDestinationRaisesOneFailure
+Passed StarComms.Tests.VoiceActivationTests.HeldButtonOverridesSpeechUntilNextPhrase(ship: True, command: False, auto: Ship)
+Passed StarComms.Tests.CoreTests.UDP007_EndBeforeVoiceAndGenerationReset
+Passed StarComms.Tests.CoreTests.CON002_Invalid(input: "127.1")
+Passed StarComms.Tests.CoreTests.ROUTE_RoleRevocation
+Passed StarComms.Tests.CoreTests.TCP001_InvalidLength(length: 0)
+Passed StarComms.Tests.AudioTests.AUD003_SenderGainAndDucking
+Passed StarComms.Tests.CoreTests.CON002_Invalid(input: "::")
+Passed StarComms.Tests.CoreTests.CON002_Invalid(input: "224.0.0.1")
+Passed StarComms.Tests.CoreTests.PTT002_FirstWins(first: Ship, second: Command)
+Passed StarComms.Tests.AudioTests.AUD006_IndependentBursts
+Passed StarComms.Tests.FlightVoiceTests.TwoShipsKeepThePrivatePhraseOutOfCrewAudio
+Passed StarComms.Tests.CoreTests.CON002_Invalid(input: "0177.0.0.1")
+Passed StarComms.Tests.CoreTests.CON002_Valid(input: "127.0.0.1", port: 49555)
+Passed StarComms.Tests.AudioTests.AUD001_ActualOpusRoundtrip
+Passed StarComms.Tests.HostTests.HOST001_ReserveMatchingTcpAndUdpPorts
+Passed StarComms.Tests.HostTests.ConcurrentAdmissionsRespectTwelveMemberLimit
+Passed StarComms.Tests.CoreTests.AUTH003_CapacityAndUnicode
+Passed StarComms.Tests.HostTests.IPv6LoopbackWithPinnedCertificate
+Passed StarComms.Tests.CoreTests.CON002_Invalid(input: "starcomms://join?v=1&v=1")
+Passed StarComms.Tests.ConnectionTests.CancelPendingThenConnectAndLeave
+Passed StarComms.Tests.AudioTests.AUD002_LossBacklogAndRecovery
+Passed StarComms.Tests.CoreTests.UDP005_BoundedMalformedPackets
+Passed StarComms.Tests.RouterTests.PmpActualPortAndFailedRenewal
+Passed StarComms.Tests.CoreTests.PTT002_FirstWins(first: Command, second: Ship)
+Passed StarComms.Tests.ConnectionTests.BlockedUdpAndReplacedCaptainResume
+Passed StarComms.Tests.VoiceActivationTests.ManualModesNeverOpenOnSpeech
+Passed StarComms.Tests.CoreTests.CON002_Valid(input: "127.0.0.1:1234", port: 1234)
+Passed StarComms.Tests.CoreTests.CON002_Invalid(input: "127.0.0.1:0")
+Passed StarComms.Tests.VoiceActivationTests.TwoAutomaticChannelsRequireAnExplicitTargetAndPermission
+Passed StarComms.Tests.CoreTests.CON002_Invalid(input: "host.example")
+Passed StarComms.Tests.CoreTests.ROLE003_DeleteShipClearsRoles
+Passed StarComms.Tests.CoreTests.CON002_Invalid(input: "127.0.0.1:65536")
+Passed StarComms.Tests.RouterTests.ForeignPortPreservedAndPartialPairRemoved
+Passed StarComms.Tests.FlightVoiceTests.QuietSpeechCanBeEnabledByLoweringTheThreshold
+Passed StarComms.Tests.CoreTests.UDP003_ConcurrentNonceUniqueness
+Passed StarComms.Tests.LoggingTests.DisabledRotationAndBoundedQueue
+Passed StarComms.Tests.CoreTests.CON002_Invitation
+Passed StarComms.Tests.CoreTests.TCP001_OneByteReadsAndMultipleFrames
+Passed StarComms.Tests.CoreTests.PTT003_HeldAcrossDisarm
+Passed StarComms.Tests.CoreTests.ROLE004_TransferRequiresCurrentCaptain
+Passed StarComms.Tests.CoreTests.CON002_Valid(input: "[::1]:49999", port: 49999)
+Passed StarComms.Tests.CoreTests.VER001_CentralVersion
+Passed StarComms.Tests.CoreTests.UDP001_AllTamperedBitsRejected
+Passed StarComms.Tests.CoreTests.CON002_Invalid(input: "[::1]:abc")
+Passed StarComms.Tests.CoreTests.CON002_Valid(input: "::1", port: 49555)
+Passed StarComms.Tests.HostTests.MutationReplyCanBeRequestedAgainAndOldEpochIsRejected
+Passed StarComms.Tests.CoreTests.TCP001_InvalidLength(length: 65537)
+Passed StarComms.Tests.VoiceActivationTests.HeldButtonOverridesSpeechUntilNextPhrase(ship: False, command: True, auto: Command)
+Passed StarComms.Tests.CoreTests.UDP002_ReorderingReplayAndBadHighSequence
+Passed StarComms.Tests.CoreTests.CON002_Invalid(input: "0x7f000001")
+Passed StarComms.Tests.CoreTests.TLS001_ExactPin

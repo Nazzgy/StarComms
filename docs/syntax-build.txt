@@ -1,0 +1,7 @@
+  StarComms.SyntaxChecks -> F:\github\StarComms\tools\StarComms.SyntaxChecks\bin\Debug\net10.0\StarComms.SyntaxChecks.dll
+
+Vytv├í┼Öen├ş sestaven├ş bylo ├║sp─Ť┼ín─Ť dokon─Źeno.
+    0 upozorn─Ťn├ş
+    Po─Źet chyb: 0
+
+Uplynul├Ż ─Źas 00:00:02.19

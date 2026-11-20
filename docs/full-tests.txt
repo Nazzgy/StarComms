@@ -1,0 +1,36 @@
+PASS AUD001_ActualOpusRoundtrip 
+PASS AUD006_IndependentBursts 
+PASS CON002_Valid 127.0.0.1,49555
+PASS CON002_Valid 127.0.0.1:1234,1234
+PASS CON002_Valid ::1,49555
+PASS CON002_Valid [::1]:49999,49999
+PASS CON002_Invalid 0.0.0.0
+PASS CON002_Invalid ::
+PASS CON002_Invalid 127.0.0.1:0
+PASS CON002_Invalid 127.0.0.1:65536
+PASS CON002_Invalid host.example
+PASS CON002_Invalid [::1]:abc
+PASS CON002_Invalid 224.0.0.1
+PASS CON002_Invalid starcomms://join?v=1&v=1
+PASS CON002_Invalid 127.1
+PASS CON002_Invalid 0x7f000001
+PASS CON002_Invalid 0177.0.0.1
+PASS CON002_Invitation 
+PASS AUTH003_CapacityAndUnicode 
+PASS ROUTE_RoleRevocation 
+PASS ROLE004_TransferRequiresCurrentCaptain 
+PASS ROLE003_DeleteShipClearsRoles 
+PASS PTT002_FirstWins Ship,Command
+PASS PTT002_FirstWins Command,Ship
+PASS PTT003_HeldAcrossDisarm 
+PASS UDP001_AllTamperedBitsRejected 
+PASS UDP002_ReorderingReplayAndBadHighSequence 
+PASS UDP003_ConcurrentNonceUniqueness 
+PASS UDP005_BoundedMalformedPackets 
+PASS UDP007_EndBeforeVoiceAndGenerationReset 
+PASS TCP001_OneByteReadsAndMultipleFrames 
+PASS TCP001_InvalidLength 0
+PASS TCP001_InvalidLength 65537
+PASS TLS001_ExactPin 
+PASS VER001_CentralVersion 
+Passed=35 Failed=0. Direct invocation of xUnit test methods; no VSTest socket required.

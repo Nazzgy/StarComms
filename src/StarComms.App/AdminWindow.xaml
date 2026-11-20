@@ -1,0 +1,58 @@
+<Window x:Class="StarComms.App.AdminWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Style="{StaticResource AppWindow}" Title="StarComms · Správa flotily"
+    Width="900" Height="660" MinWidth="680" MinHeight="470" WindowStartupLocation="CenterOwner">
+  <DockPanel Margin="20">
+    <TextBlock DockPanel.Dock="Top" Text="Správa flotily" FontSize="28" FontWeight="SemiBold" Margin="4,0,4,12"/>
+    <TextBlock DockPanel.Dock="Bottom" x:Name="VersionLabel" HorizontalAlignment="Right" FontSize="12" Foreground="#C1C6CF"/>
+    <DockPanel DockPanel.Dock="Bottom" Margin="0,8,0,2">
+      <Button DockPanel.Dock="Right" Content="Zavřít" IsCancel="True"/>
+      <TextBlock x:Name="Feedback" VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite"/>
+    </DockPanel>
+    <TabControl>
+      <TabItem Header="Lodě a posádky">
+        <Grid Margin="8">
+          <Grid.ColumnDefinitions><ColumnDefinition Width="2*" MinWidth="170"/><ColumnDefinition Width="3*"/></Grid.ColumnDefinitions>
+          <DockPanel Margin="0,0,12,0">
+            <Button DockPanel.Dock="Top" Content="Přidat loď" x:Name="NewShip" Click="Create" Style="{StaticResource Primary}"/>
+            <ListBox x:Name="Ships" DisplayMemberPath="Name" SelectedValuePath="ShipId" AutomationProperties.Name="Lodě flotily" SelectionChanged="ShipChanged"/>
+          </DockPanel>
+          <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Margin="8,0">
+              <TextBlock x:Name="ShipTitle" FontSize="24" FontWeight="SemiBold"/>
+              <TextBlock x:Name="ShipInfo" Foreground="#C1C6CF"/>
+              <StackPanel x:Name="Details">
+                <WrapPanel>
+                  <Button Content="Upravit loď" Click="Rename"/>
+                  <Button Content="Zrušit loď" Click="Delete"/>
+                </WrapPanel>
+                <TextBlock Text="Posádka" FontSize="20" Margin="4,16,0,4"/>
+                <TextBlock x:Name="EmptyCrew" Text="Na palubě zatím nikdo není."/>
+                <ListBox x:Name="Crew" DisplayMemberPath="Label" SelectedValuePath="Id" MaxHeight="195" AutomationProperties.Name="Posádka vybrané lodi" SelectionChanged="CrewChanged"/>
+                <Button x:Name="Promote" Content="Jmenovat kapitánem" Click="Appoint"/>
+                <TextBlock Text="Přidat člena na palubu" FontSize="20" Margin="4,16,0,4"/>
+                <ComboBox x:Name="Boarding" DisplayMemberPath="Label" SelectedValuePath="Id" AutomationProperties.Name="Hráč k přesunu" SelectionChanged="BoardingChanged"/>
+                <Button x:Name="Board" Content="Přesunout na tuto loď" Click="Move"/>
+                <TextBlock x:Name="NobodyToBoard" Text="Všichni hráči flotily už jsou na palubě."/>
+              </StackPanel>
+            </StackPanel>
+          </ScrollViewer>
+        </Grid>
+      </TabItem>
+      <TabItem Header="Hráči">
+        <DockPanel Margin="14">
+          <Button DockPanel.Dock="Bottom" x:Name="RemovePlayer" IsEnabled="False" HorizontalAlignment="Left" Content="Vyřadit z flotily" Click="Kick"/>
+          <ListBox x:Name="Players" DisplayMemberPath="Label" SelectedValuePath="Id" AutomationProperties.Name="Všichni hráči" SelectionChanged="PlayerChanged"/>
+        </DockPanel>
+      </TabItem>
+      <TabItem Header="Šablona lodí">
+        <StackPanel Margin="18">
+          <TextBlock Text="Uloží názvy a modely všech lodí pro příští let."/>
+          <WrapPanel><Button Content="Uložit současné lodě" Click="SaveTemplate"/>
+            <Button Content="Přidat lodě ze šablony" Click="LoadTemplate"/></WrapPanel>
+        </StackPanel>
+      </TabItem>
+    </TabControl>
+  </DockPanel>
+</Window>

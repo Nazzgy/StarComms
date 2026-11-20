@@ -1,0 +1,10 @@
+F:\github\StarComms\src\StarComms.App\StarComms.App.csproj : warning NU1510: PackageReference System.Security.Cryptography.ProtectedData se nevy┼Öad├ş. Tento bal├ş─Źek je automaticky dostupn├Ż a nen├ş pot┼Öeba na n─Ťj explicitn─Ť odkazovat. Odeberte polo┼żku PackageReference.
+F:\github\StarComms\src\StarComms.App\StarComms.App.csproj : error NU1301: Nepovedlo se na─Ź├şst index slu┼żby pro zdroj https://api.nuget.org/v3/index.json.
+F:\github\StarComms\src\StarComms.App\StarComms.App.csproj : error NU1301:   Nen├ş zn├ím ┼ż├ídn├Ż takov├Ż hostitel. (api.nuget.org:443)
+F:\github\StarComms\src\StarComms.App\StarComms.App.csproj : error NU1301:   Nen├ş zn├ím ┼ż├ídn├Ż takov├Ż hostitel.
+F:\github\StarComms\src\StarComms.App\StarComms.App.csproj : error NU1301: Nepovedlo se na─Ź├şst index slu┼żby pro zdroj https://api.nuget.org/v3/index.json.
+F:\github\StarComms\src\StarComms.App\StarComms.App.csproj : error NU1301:   Nen├ş zn├ím ┼ż├ídn├Ż takov├Ż hostitel. (api.nuget.org:443)
+F:\github\StarComms\src\StarComms.App\StarComms.App.csproj : error NU1301:   Nen├ş zn├ím ┼ż├ídn├Ż takov├Ż hostitel.
+F:\github\StarComms\src\StarComms.App\StarComms.App.csproj : error NU1301: Nepovedlo se na─Ź├şst index slu┼żby pro zdroj https://api.nuget.org/v3/index.json.
+F:\github\StarComms\src\StarComms.App\StarComms.App.csproj : error NU1301:   Nen├ş zn├ím ┼ż├ídn├Ż takov├Ż hostitel. (api.nuget.org:443)
+F:\github\StarComms\src\StarComms.App\StarComms.App.csproj : error NU1301:   Nen├ş zn├ím ┼ż├ídn├Ż takov├Ż hostitel.

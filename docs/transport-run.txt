@@ -1,0 +1,39 @@
+F:\github\StarComms\src\StarComms.Engine\ControlLink.cs(26,21): warning CS9124: Parametr double capacity je zachycen do stavu nadřazeného typu a jeho hodnota se také používá k inicializaci pole, vlastnosti nebo události. [F:\github\StarComms\tools\StarComms.TransportChecks\StarComms.TransportChecks.csproj]
+PASS ROUTE member 1
+PASS ROUTE member 2
+PASS ROUTE member 3
+PASS ROUTE member 4
+PASS ROUTE member 5
+PASS ROUTE member 6
+PASS ROUTE member 7
+PASS ROUTE member 8
+PASS ROUTE member 9
+PASS ROUTE member 10
+PASS ROUTE member 11
+PASS ROUTE member 12
+PASS UDP bad tag
+PASS UDP roundtrip
+PASS UDP replay
+PASS PTT first wins
+PASS PTT no takeover
+PASS PTT new press
+PASS PTT held disarm
+PASS 12 TLS clients + authenticated UDP probes
+PASS encrypted Ship, sender 0, recipients 1,2,3
+PASS encrypted Ship, sender 1, recipients 0,2,3
+PASS encrypted Ship, sender 2, recipients 0,1,3
+PASS encrypted Ship, sender 3, recipients 0,1,2
+PASS encrypted Ship, sender 4, recipients 5,6,7
+PASS encrypted Ship, sender 5, recipients 4,6,7
+PASS encrypted Ship, sender 6, recipients 4,5,7
+PASS encrypted Ship, sender 7, recipients 4,5,6
+PASS encrypted Ship, sender 8, recipients 9,10,11
+PASS encrypted Ship, sender 9, recipients 8,10,11
+PASS encrypted Ship, sender 10, recipients 8,9,11
+PASS encrypted Ship, sender 11, recipients 8,9,10
+PASS encrypted Command, sender 0, recipients 4,8
+PASS encrypted Command, sender 4, recipients 0,8
+PASS encrypted Command, sender 8, recipients 0,4
+PASS encrypted Command, sender 4, recipients 1,8
+PASS encrypted Ship, sender 5, recipients 4,6,7
+37 checks passed; this is NOT Opus, audio, internet or LOAD-001 verification.

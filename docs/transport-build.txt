@@ -1,0 +1,14 @@
+  Zji┼í┼ąuj├ş se projekty, kter├ę se maj├ş obnovit...
+  Obnovil se projekt F:\github\StarComms\tools\StarComms.TransportChecks\StarComms.TransportChecks.csproj (v 118 ms).
+  Obnovil se projekt F:\github\StarComms\src\StarComms.Core\StarComms.Core.csproj (v 109 ms).
+  StarComms.Core -> F:\github\StarComms\src\StarComms.Core\bin\Debug\net10.0\StarComms.Core.dll
+F:\github\StarComms\src\StarComms.Engine\ControlLink.cs(26,21): warning CS9124: Parametr double capacity je zachycen do stavu nad┼Öazen├ęho typu a jeho hodnota se tak├ę pou┼ż├şv├í k inicializaci pole, vlastnosti nebo ud├ílosti. [F:\github\StarComms\tools\StarComms.TransportChecks\StarComms.TransportChecks.csproj]
+  StarComms.TransportChecks -> F:\github\StarComms\tools\StarComms.TransportChecks\bin\Debug\net10.0\StarComms.TransportChecks.dll
+
+Vytv├í┼Öen├ş sestaven├ş bylo ├║sp─Ť┼ín─Ť dokon─Źeno.
+
+F:\github\StarComms\src\StarComms.Engine\ControlLink.cs(26,21): warning CS9124: Parametr double capacity je zachycen do stavu nad┼Öazen├ęho typu a jeho hodnota se tak├ę pou┼ż├şv├í k inicializaci pole, vlastnosti nebo ud├ílosti. [F:\github\StarComms\tools\StarComms.TransportChecks\StarComms.TransportChecks.csproj]
+    1 upozorn─Ťn├ş
+    Po─Źet chyb: 0
+
+Uplynul├Ż ─Źas 00:00:25.36

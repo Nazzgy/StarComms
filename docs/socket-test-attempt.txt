@@ -1,0 +1,29 @@
+PASS ROUTE member 1
+PASS ROUTE member 2
+PASS ROUTE member 3
+PASS ROUTE member 4
+PASS ROUTE member 5
+PASS ROUTE member 6
+PASS ROUTE member 7
+PASS ROUTE member 8
+PASS ROUTE member 9
+PASS ROUTE member 10
+PASS ROUTE member 11
+PASS ROUTE member 12
+PASS UDP bad tag
+PASS UDP roundtrip
+PASS UDP replay
+PASS PTT first wins
+PASS PTT no takeover
+PASS PTT new press
+PASS PTT held disarm
+Unhandled exception. System.Net.Sockets.SocketException (10013): Došlo k pokusu o přístup k soketu způsobem zakázaným jeho přístupovými oprávněními.
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Sockets.TcpClient.CompleteConnectAsync(ValueTask task)
+   at StarComms.Engine.Client.Open(CancellationToken ct)
+   at StarComms.Engine.Client.Connect(JoinAddress target, String name, Nullable`1 resumeSession, String token, CancellationToken ct)
+   at StarComms.Engine.Host.ConnectLocal(String nickname)
+   at Program.<Main>$(String[] args)
+   at Program.<Main>$(String[] args)
+   at Program.<Main>(String[] args)

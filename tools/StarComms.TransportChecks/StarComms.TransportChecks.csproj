@@ -1,0 +1,1 @@
+<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><OutputType>Exe</OutputType></PropertyGroup><ItemGroup><ProjectReference Include="../../src/StarComms.Core/StarComms.Core.csproj"/><Compile Include="../../src/StarComms.Engine/*.cs" Exclude="../../src/StarComms.Engine/Audio*.cs" Link="Engine/%(Filename)%(Extension)"/></ItemGroup></Project>

@@ -1,0 +1,10 @@
+PASS start screen from standalone EXE in a path containing spaces and accents
+WASAPI: Mikrofon připraven · výstup připraven
+PASS WASAPI player opened and completed test tone (no listening assessment)
+PASS default Logs on is off
+PASS log is beside EXE when CWD differs and file is closed after disabling
+PASS published EXE hosting
+PASS connected across compatible builds with both versions visible
+PASS second EXE joined with pinned invitation, approved and boarded Polaris
+PASS confirmed shutdown of host
+PASS normal shutdown
