@@ -18,7 +18,11 @@ public sealed class Command(Func<object?, Task> execute) : ICommand
     public event EventHandler? CanExecuteChanged;
     public async void Execute(object? p) { if (executing) return; executing = true; CanExecuteChanged?.Invoke(this, EventArgs.Empty); try { await execute(p); } finally { executing = false; CanExecuteChanged?.Invoke(this, EventArgs.Empty); } }
 }
-public sealed record ShipCard(uint ShipId, string Name, string Model, int Count, string Captain, bool IsOwnShip);
+public sealed record ShipCard(uint ShipId, string Name, string Model, Member[] Members, bool IsOwnShip)
+{
+    public bool CanClaimCaptain => IsOwnShip && !Members.Any(m => m.IsCaptain);
+    public bool Expanded { get; set; } = true;
+}
 public sealed class MainViewModel : INotifyPropertyChanged, IAsyncDisposable
 {
     readonly Dispatcher dispatcher = Application.Current.Dispatcher;
@@ -34,7 +38,7 @@ public sealed class MainViewModel : INotifyPropertyChanged, IAsyncDisposable
     Ship? selectedShip;
     public event PropertyChangedEventHandler? PropertyChanged;
     void Notify([CallerMemberName] string? name = null) => PropertyChanged?.Invoke(this, new(name));
-    public void Refresh() => dispatcher.BeginInvoke(() => { selectedShip = client?.Snapshot?.Ships.FirstOrDefault(s => s.ShipId == selectedShip?.ShipId) ?? client?.Snapshot?.Ships.FirstOrDefault(s => s.ShipId == client.Self?.ShipId); Notify(""); });
+    public void Refresh() => dispatcher.BeginInvoke(() => { selectedShip = client?.Snapshot?.Ships.FirstOrDefault(s => s.ShipId == selectedShip?.ShipId) ?? client?.Snapshot?.Ships.FirstOrDefault(s => s.ShipId == client.Self?.ShipId); selectedMember = client?.Snapshot?.Members.FirstOrDefault(m => m.MemberId == selectedMember?.MemberId && m.ShipId == selectedShip?.ShipId); Notify(""); });
     public string Version => VersionInfo.Display;
     public bool StartVisible => page == "start";
     public bool FleetVisible => page == "fleet";
@@ -42,6 +46,9 @@ public sealed class MainViewModel : INotifyPropertyChanged, IAsyncDisposable
     public string Message { get => message; set { message = value; Notify(); Notify(nameof(HasMessage)); } }
     public bool HasMessage => Message.Length > 0;
     public string Status => client?.Status ?? connectingClient?.Status ?? status;
+    public bool ShowLastFleet => !Busy && !string.IsNullOrEmpty(Settings.LastFleetInvitation);
+    public string LastFleetLabel => $"Znovu připojit: {Settings.LastFleetName}";
+    public ICommand LastFleetCommand { get; }
     public bool Busy => connecting != null;
     public bool IsHost => host != null;
     public bool NeedsProbe => client?.Snapshot != null && !client.VoiceReady;
@@ -55,11 +62,21 @@ public sealed class MainViewModel : INotifyPropertyChanged, IAsyncDisposable
     public string FleetName { get; set; } = "Večerní let";
     public Ship[] Ships => client?.Snapshot?.Ships ?? [];
     public string ConnectedFleet => client?.Snapshot?.FleetName ?? "";
-    public ShipCard[] ShipCards => client?.Snapshot is { } fleet
-        ? fleet.Ships.Select(s => new ShipCard(s.ShipId, s.Name, s.Model,
-            fleet.Members.Count(m => m.ShipId == s.ShipId),
-            fleet.Members.FirstOrDefault(m => m.MemberId == s.CaptainMemberId) is { } captain ? "Kapitán " + captain.Nickname : "Bez kapitána", s.ShipId == client.Self?.ShipId)).ToArray()
-        : [];
+    FleetSnapshot? displayedFleet;
+    ShipCard[] channels = [];
+    public ShipCard[] ShipCards {
+        get {
+            var fleet = client?.Snapshot;
+            if (ReferenceEquals(fleet, displayedFleet)) return channels;
+            var collapsed = displayedFleet?.SessionId == fleet?.SessionId
+                ? channels.Where(c => !c.Expanded).Select(c => c.ShipId).ToHashSet() : [];
+            channels = fleet?.Ships.Select(s => new ShipCard(s.ShipId, s.Name, s.Model,
+                fleet.Members.Where(m => m.ShipId == s.ShipId).ToArray(), s.ShipId == client?.Self?.ShipId)
+                { Expanded = !collapsed.Contains(s.ShipId) }).ToArray() ?? [];
+            displayedFleet = fleet;
+            return channels;
+        }
+    }
     public uint? SelectedShipId
     {
         get => selectedShip?.ShipId;
@@ -68,13 +85,15 @@ public sealed class MainViewModel : INotifyPropertyChanged, IAsyncDisposable
     public Member[] Crew => client?.Snapshot?.Members.Where(m => SelectedShip != null && m.ShipId == SelectedShip.ShipId).ToArray() ?? [];
     public Member[] Captains => client?.Snapshot?.Members.Where(m => m.IsCaptain).ToArray() ?? [];
     public Admission[] Pending => host?.Pending ?? [];
-    public Ship? SelectedShip { get => selectedShip; set { if (selectedShip?.ShipId != value?.ShipId) SelectedMember = null; selectedShip = value; Notify(nameof(CanBoard)); Notify(nameof(CanTransfer)); Notify(); Notify(nameof(Crew)); Notify(nameof(ShipContext)); } }
+    public Ship? SelectedShip { get => selectedShip; set { if (selectedShip?.ShipId != value?.ShipId) SelectedMember = null; selectedShip = value; Notify(nameof(CanBoard)); Notify(nameof(CanClaimCaptain)); Notify(nameof(CanTransfer)); Notify(); Notify(nameof(Crew)); Notify(nameof(ShipContext)); } }
     Member? selectedMember;
     public Member? SelectedMember
     {
         get => selectedMember;
-        set { selectedMember = value; Notify(nameof(CanTransfer)); Notify(); Notify(nameof(MemberVolume)); Notify(nameof(MemberSelected)); }
+        set { selectedMember = value; Notify(nameof(CanAppoint)); Notify(nameof(OtherShips)); Notify(nameof(CanTransfer)); Notify(); Notify(nameof(MemberVolume)); Notify(nameof(MemberSelected)); }
     }
+    public bool CanClaimCaptain => SelectedShip is { CaptainMemberId: null } ship && client?.Self is { Status: MemberStatus.Online } self && self.ShipId == ship.ShipId;
+    public ICommand ClaimCaptainCommand { get; }
     public bool CanBoard => SelectedShip != null && client?.Self is { Status: MemberStatus.Online } self && SelectedShip.ShipId != self.ShipId;
     public bool CanTransfer => IsCaptain && SelectedMember is { IsCaptain: false, Status: MemberStatus.Online } member
         && member.ShipId == client?.Self?.ShipId && member.ShipId == SelectedShip?.ShipId;
@@ -100,8 +119,8 @@ public sealed class MainViewModel : INotifyPropertyChanged, IAsyncDisposable
         Notify(nameof(Speakers));
         Notify(nameof(Receiving));
     }
-    public string ShipContext => SelectedShip == null ? "Vyber svou loď" : SelectedShip.ShipId == client?.Self?.ShipId ? "Tvoje loď" : "Pouze prohlížíš · audio se nemění";
-    public string EmptyShips => Ships.Length == 0 ? IsHost ? "Vytvořit první loď ve správě flotily" : "Hostitel připravuje lodě" : "";
+    public string ShipContext => SelectedShip == null ? (Ships.Length == 0 ? EmptyShips : "Vyber loď ze seznamu") : SelectedShip.ShipId == client?.Self?.ShipId ? "Tvoje loď" : "Pouze prohlížíš · audio se nemění";
+    public string EmptyShips => Ships.Length == 0 ? "První loď založíš přes Přidat loď." : "";
     public string Identity => client?.Self is Member m ? $"{m.Nickname} · {(m.IsCaptain ? "Kapitán" : "Posádka")}{(Audio.Muted ? " · mikrofon ztlumen" : "")}" : "";
     public string TalkStatus => Audio.Transmitting switch { VoiceChannel.Ship => "Mluvíš k posádce vlastní lodi", VoiceChannel.Command => "Mluvíš ke kapitánům. Posádky tě neslyší.", _ => CanTalk ? ShipAutomatic || IsCaptain && CommandAutomatic ? "Hlasová aktivace čeká na řeč" : "Pro mluvení drž tlačítko" : "Mikrofon se neodesílá" };
     public string? VersionWarning => client?.VersionWarning;
@@ -120,12 +139,14 @@ public sealed class MainViewModel : INotifyPropertyChanged, IAsyncDisposable
     public GridLength BelowThreshold => new(65 + ThresholdDb, GridUnitType.Star);
     public GridLength AboveThreshold => new(-ThresholdDb, GridUnitType.Star);
     public string PreviewStatus => !Audio.InputAvailable ? "Mikrofon nedostupný" : Audio.PreviewSpeech ? "Řeč zachycena" : "Ticho";
-    public float ShipVolume { get => Settings.ShipVolume; set { Settings.ShipVolume = value; Audio.Mixer.ShipVolume = value; } }
-    public float CommandVolume { get => Settings.CommandVolume; set { Settings.CommandVolume = value; Audio.Mixer.CommandVolume = value; } }
+    public float ShipVolume { get => Settings.ShipVolume; set { Settings.ShipVolume = value; Audio.Mixer.ShipVolume = value; Notify(); } }
+    public float CommandVolume { get => Settings.CommandVolume; set { Settings.CommandVolume = value; Audio.Mixer.CommandVolume = value; Notify(); } }
     public bool Ducking { get => Settings.Ducking; set { Settings.Ducking = value; Audio.Mixer.Ducking = value; } }
     public bool Logs { get => Settings.LoggingEnabled; set { Settings.LoggingEnabled = value; _ = Run(async () => { await log.Set(value); Save(); Notify(nameof(Logs)); }); } }
     public bool ShipAutomatic { get => Settings.ShipAutomatic; set { Settings.ShipAutomatic = value; ApplyModes(); } }
     public bool CommandAutomatic { get => Settings.CommandAutomatic; set { Settings.CommandAutomatic = value; ApplyModes(); } }
+    public bool ShipPtt { get => !ShipAutomatic; set { if (value) ShipAutomatic = false; } }
+    public bool CommandPtt { get => !CommandAutomatic; set { if (value) CommandAutomatic = false; } }
     void ApplyModes() { Audio.ConfigureModes(ShipAutomatic, CommandAutomatic); Notify(""); }
     public bool SelectAutomatic(VoiceChannel channel)
     {
@@ -152,12 +173,32 @@ public sealed class MainViewModel : INotifyPropertyChanged, IAsyncDisposable
     public ICommand MuteCommand { get; }
     public ICommand LeaveCommand { get; }
     public ICommand JoinCommand { get; }
+    public ICommand DeleteEmptyShipCommand { get; }
     public ICommand TransferCommand { get; }
     public ICommand ProbeCommand { get; }
     public ICommand RetryCommand { get; }
     public ICommand AdmitCommand { get; }
     public ICommand DenyCommand { get; }
+    public bool CreatingShip { get; private set; }
+    public string DraftModel { get; set; } = "";
+    public string DraftName { get; set; } = "";
+    public ICommand CancelShipCommand { get; }
+    public ICommand SaveShipCommand { get; }
+    public void Inspect(object? row) {
+        if (row is not (ShipCard or Member)) return;
+        CreatingShip = false;
+        if (row is ShipCard ship) { SelectedShipId = ship.ShipId; SelectedMember = null; }
+        if (row is Member member) { SelectedShipId = member.ShipId; SelectedMember = member; }
+        Notify(nameof(CreatingShip));
+    }
+    public ICommand FirstShipCommand { get; }
     public ICommand AdminCommand { get; }
+    public string HostVoiceHint => host?.PlayersAwaitingVoice is { Length: > 0 } names
+        ? $"Hlas zatím nepotvrzen: {string.Join(", ", names)}. Zkontroluj ve firewallu a na routeru UDP port {host.Port}." : "";
+    public ICommand AppointCommand { get; }
+    public ICommand MoveCrewCommand { get; }
+    public Ship[] OtherShips => Ships.Where(s => s.ShipId != SelectedMember?.ShipId).ToArray();
+    public bool CanAppoint => IsHost && SelectedMember is { IsCaptain: false, Status: MemberStatus.Online };
     public string HostStatus => host == null ? "" : host.VerifiedPlayers.Length == 0
         ? "Hostování běží · čeká se na ověření spojení s hráčem" : "Spojení ověřeno · " + string.Join(", ", host.VerifiedPlayers);
     public ICommand CopyInvitationCommand { get; }
@@ -171,17 +212,51 @@ public sealed class MainViewModel : INotifyPropertyChanged, IAsyncDisposable
     {
         Audio.SetThreshold(ThresholdDb);
         ApplyModes();
-        ConnectCommand = Cmd(Connect); HostCommand = Cmd(StartHost); CancelCommand = Act(() => connecting?.Cancel()); PasteCommand = Act(() => Address = Clipboard.GetText());
+        LastFleetCommand = Cmd(() => Connect(Settings.LastFleetInvitation));
+        ConnectCommand = Cmd(() => Connect(Address)); HostCommand = Cmd(StartHost); CancelCommand = Act(() => connecting?.Cancel()); PasteCommand = Act(() => Address = Clipboard.GetText());
         SettingsCommand = Cmd(async () => { Audio.Paused = true; Audio.Disarm(); page = "settings"; Inputs = Audio.Devices(DataFlow.Capture); Outputs = Audio.Devices(DataFlow.Render); await Audio.Configure(InputId, OutputId); });
         DoneCommand = Cmd(async () => { if (client == null) await Audio.StopDevices(); bindingTarget = null; Audio.Editing = false; Audio.Disarm(); Save(); page = client == null ? "start" : "fleet"; Audio.Paused = false; });
         DevicesCommand = Cmd(async () => { await Audio.Configure(InputId, OutputId); if (Audio.InputAvailable && Audio.OutputAvailable) Message = "Mikrofon i sluchátka jsou připravené."; });
         ToneCommand = Cmd(async () => { await Audio.Tone(OutputId); Message = "Přehrání testovacího tónu dokončeno."; });
         BindShipCommand = Act(() => BeginBinding("ship")); BindCommandCommand = Act(() => BeginBinding("command"));
         MuteCommand = Act(() => Audio.Mute(!Audio.Muted)); LeaveCommand = Cmd(async () => { if (ConfirmLeave()) await Leave(); });
-        JoinCommand = Cmd(async () => { if (client?.Self is Member m && SelectedShip != null) await client.Mutate("JoinShip", new JoinShip(SelectedShip.ShipId, m.MembershipEpoch)); });
+        JoinCommand = new Command(target => Run(async () => {
+            var shipId = target as uint? ?? SelectedShipId;
+            if (client?.Self is Member m && shipId is uint id)
+                await client.Mutate("JoinShip", new JoinShip(id, m.MembershipEpoch));
+        }));
+        DeleteEmptyShipCommand = new Command(target => Run(async () => {
+            if (client != null && target is uint id)
+                await client.Mutate("DeleteEmptyShip", new DeleteEmptyShip(id));
+        }));
+        ClaimCaptainCommand = new Command(target => Run(async () => {
+            if (target is uint ship && client?.Self is Member self)
+                await client.Mutate("ClaimCaptain", new ClaimCaptain(ship, self.MembershipEpoch));
+        }));
         TransferCommand = Cmd(async () => { if (client?.Self is Member m && m.ShipId is uint ship && SelectedMember != null) await client.Mutate("TransferCaptain", new TransferCaptain(ship, SelectedMember.MemberId, m.MembershipEpoch)); });
+        AppointCommand = Act(() => {
+            if (host == null || SelectedMember is not { ShipId: uint ship } member) return;
+            host.Mutate(f => f.Captain(ship, member.MemberId));
+            Message = $"Lodi nyní velí {member.Nickname}.";
+        });
+        MoveCrewCommand = new Command(destination => Run(() => {
+            if (host != null && SelectedMember is Member member && destination is Ship ship) {
+                host.Mutate(f => f.Move(member.MemberId, ship.ShipId, member.MembershipEpoch));
+                Message = $"{member.Nickname} je na palubě lodi {ship.Name}.";
+            }
+            return Task.CompletedTask;
+        }));
         ProbeCommand = Cmd(async () => { if (client != null) await client.Probe(); }); RetryCommand = Cmd(async () => { if (client != null) await client.Retry(); });
         AdmitCommand = new Command(p => Run(() => { host?.Decide((Guid)p!, true); return Task.CompletedTask; })); DenyCommand = new Command(p => Run(() => { host?.Decide((Guid)p!, false); return Task.CompletedTask; }));
+        FirstShipCommand = Act(() => { DraftName = ""; DraftModel = ""; CreatingShip = true; });
+        CancelShipCommand = Act(() => CreatingShip = false);
+        SaveShipCommand = Cmd(async () => {
+            if (client?.Self is not Member self) return;
+            var name = Fleet.Text(DraftName, 1, 32);
+            await client.Mutate("CreateShip", new CreateShip(name, self.MembershipEpoch, DraftModel));
+            CreatingShip = false;
+            Message = $"Loď {name} byla vytvořena.";
+        });
         AdminCommand = Act(() => { if (host != null) new AdminWindow(host, log, SelectedShipId).ShowDialog(); });
         CopyInvitationCommand = Act(() => {
             if (host == null) return;
@@ -229,13 +304,13 @@ public sealed class MainViewModel : INotifyPropertyChanged, IAsyncDisposable
         if (key == Settings.ShipBinding) Audio.Input(key, VoiceChannel.Ship, down, enabled);
         if (key == Settings.CommandBinding) Audio.Input(key, VoiceChannel.Command, down, enabled);
     }
-    async Task Connect()
+    async Task Connect(string address)
     {
         if (connecting != null || client != null) return;
-        var target = JoinAddress.Parse(Address); Fleet.Text(Nickname, 2, 24);
+        var target = JoinAddress.Parse(address); Fleet.Text(Nickname, 2, 24);
         bool pinnedInvitation = target.Fingerprint != null;
         if (target.Fingerprint == null && trusted.TryGetValue(target.Endpoint, out var pin)) target = target with { Fingerprint = pin };
-        connecting = new(); Notify(nameof(Busy)); var next = new Client(); connectingClient = next; next.Changed += Refresh;
+        connecting = new(); Notify(nameof(Busy)); Notify(nameof(ShowLastFleet)); var next = new Client(); connectingClient = next; next.Changed += Refresh;
         try {
             try { await next.Connect(target, Nickname, ct: connecting.Token); }
             catch (IdentityException e) {
@@ -248,7 +323,9 @@ public sealed class MainViewModel : INotifyPropertyChanged, IAsyncDisposable
                 if (!ConfirmationWindow.Ask(title, $"Otisk: {e.Fingerprint}\n\nPorovnej otisk s hostitelem.", "Důvěřovat a připojit")) return;
                 target = target with { Fingerprint = e.Fingerprint }; next = new(); connectingClient = next; next.Changed += Refresh; await next.Connect(target, Nickname, ct: connecting.Token);
             }
-            trusted[target.Endpoint] = target.Fingerprint!; LocalData.Save("trusted-hosts.json", trusted); client = next; Audio.Attach(client); page = "fleet"; Save(); log.Event("CONNECTED", client.MemberId); await Audio.Configure(InputId, OutputId);
+            trusted[target.Endpoint] = target.Fingerprint!; LocalData.Save("trusted-hosts.json", trusted); Settings.LastFleetInvitation = target.Invitation(target.Fingerprint!);
+            Settings.LastFleetName = next.Snapshot?.FleetName ?? target.Endpoint;
+            client = next; Audio.Attach(client); page = "fleet"; Save(); log.Event("CONNECTED", client.MemberId); await Audio.Configure(InputId, OutputId);
         } finally { if (client != next) await next.DisposeAsync(); connecting.Dispose(); connecting = null; connectingClient = null; Notify(""); }
     }
     async Task StartHost()
@@ -269,12 +346,12 @@ public sealed class MainViewModel : INotifyPropertyChanged, IAsyncDisposable
     public bool ConfirmLeave() => host == null || ConfirmationWindow.Ask("Ukončit hostování?", "Ukončením hostování odpojíš ostatní hráče.", "Ukončit hostování");
     async Task Leave()
     {
-        Audio.Attach(null); await Audio.StopDevices(); if (client != null) await client.DisposeAsync(); if (host != null) await host.DisposeAsync(); if (router != null) { router.Cancel(); if (routerPreparation != null) await routerPreparation; await router.DisposeAsync(); } client = null; host = null; router = null; selectedShip = null; page = "start"; status = "Připojení"; log.Event("LEFT");
+        Audio.Attach(null); await Audio.StopDevices(); if (client != null) await client.DisposeAsync(); if (host != null) await host.DisposeAsync(); if (router != null) { router.Cancel(); if (routerPreparation != null) await routerPreparation; await router.DisposeAsync(); } client = null; host = null; router = null; selectedShip = null; selectedMember = null; CreatingShip = false; page = "start"; status = "Připojení"; log.Event("LEFT");
     }
     public async ValueTask DisposeAsync() { NetworkChange.NetworkAddressChanged -= NetworkChanged; connecting?.Cancel(); Save(); await Leave(); await Audio.DisposeAsync(); await log.DisposeAsync(); }
 }
 static class Errors
 {
     public static string Text(Exception e) => e.Message switch {
-        "INVALID_ADDRESS" => "Adresa není platná. Vlož znovu celé připojení od hostitele.", "INVALID_NAME" => "Zkontroluj délku a znaky jména.", "NAME_IN_USE" => "Tuto přezdívku už někdo používá. Zvol jinou.", "FULL" => "Flotila je plná. Může být připojeno nejvýše 12 hráčů.", "DENIED" => "Hostitel připojení nepřijal.", "VERSION_MISMATCH" => "Máte rozdílné verze protokolu. Získej stejnou verzi jako hostitel.", "STALE_STATE" => "Stav flotily se změnil. Aktualizuji zobrazení.", "RESUME_INVALID" => "Hostitel zahájil novou flotilu nebo platnost obnovení skončila. Připoj se znovu.", "FORBIDDEN" => "Pro tuto změnu nemáš oprávnění.", _ => e is UnauthorizedAccessException ? "Windows odepřel přístup při této operaci." : e is System.Security.Cryptography.CryptographicException crypto ? $"Windows nemohl použít identitu hostitele ({crypto.HResult:X8})." : e is OperationCanceledException ? "Připojování zrušeno nebo vypršel časový limit." : e is System.Net.Sockets.SocketException or System.IO.IOException ? "Hostitel neodpovídá. Ověř, že má spuštěné hostování, a zkus to znovu." : "Operaci se nepodařilo dokončit. Zkontroluj nastavení a zkus to znovu." };
+        "CAPTAIN_TAKEN" => "Tahle loď už má kapitána.", "SHIP_OCCUPIED" => "Loď už má posádku a nejde ji smazat.", "NOT_FOUND" => "Položka už ve flotile není.", "INVALID_ADDRESS" => "Adresa není platná. Vlož znovu celé připojení od hostitele.", "INVALID_NAME" => "Zkontroluj délku a znaky jména.", "NAME_IN_USE" => "Tuto přezdívku už někdo používá. Zvol jinou.", "FULL" => "Flotila je plná. Může být připojeno nejvýše 12 hráčů.", "DENIED" => "Hostitel připojení nepřijal.", "VERSION_MISMATCH" => "Máte rozdílné verze protokolu. Získej stejnou verzi jako hostitel.", "STALE_STATE" => "Stav flotily se změnil. Aktualizuji zobrazení.", "RESUME_INVALID" => "Hostitel zahájil novou flotilu nebo platnost obnovení skončila. Připoj se znovu.", "FORBIDDEN" => "Pro tuto změnu nemáš oprávnění.", _ => e is UnauthorizedAccessException ? "Windows odepřel přístup při této operaci." : e is System.Security.Cryptography.CryptographicException crypto ? $"Windows nemohl použít identitu hostitele ({crypto.HResult:X8})." : e is OperationCanceledException ? "Připojování zrušeno nebo vypršel časový limit." : e is System.Net.Sockets.SocketException or System.IO.IOException ? "Hostitel neodpovídá. Ověř, že má spuštěné hostování, a zkus to znovu." : "Operaci se nepodařilo dokončit. Zkontroluj nastavení a zkus to znovu." };
 }

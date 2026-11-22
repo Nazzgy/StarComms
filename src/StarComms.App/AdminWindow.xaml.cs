@@ -161,17 +161,4 @@ public partial class AdminWindow : Window
             foreach (var s in template.Ships) f.CreateShip(s.Name, s.Model);
         }), $"Počet přidaných lodí: {template.Ships.Length}.");
     }
-
-    sealed class ShipEditor : ToolWindow
-    {
-        public ShipEditor(Window owner, Ship? ship, Action<string,string> save) : base(ship == null ? "Přidat loď" : "Upravit loď")
-        {
-            Owner = owner;
-            Width = 520; Height = 445;
-            var name = Field("Název lodi", ship?.Name ?? "");
-            var model = Field("Model lodi (nepovinné)", ship?.Model ?? "");
-            Button(ship == null ? "Vytvořit loď" : "Uložit změny", () => { save(name.Text, model.Text); DialogResult = true; });
-            Loaded += (_, _) => name.Focus();
-        }
-    }
 }

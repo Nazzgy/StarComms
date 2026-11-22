@@ -74,6 +74,24 @@ public sealed class Fleet
             Changed(m with { IsCaptain = true }); ships[ship] = s with { CaptainMemberId = target }; version++;
         }
     }
+    public void ClaimCaptain(uint ship, uint actor, uint expectedEpoch)
+    {
+        lock (Sync) {
+            var member = Get(actor);
+            if (member.MembershipEpoch != expectedEpoch) throw new RuleException("STALE_STATE");
+            if (member.ShipId != ship || member.Status != MemberStatus.Online) throw new RuleException("FORBIDDEN");
+            if (ships[ship].CaptainMemberId is uint captain && captain != actor) throw new RuleException("CAPTAIN_TAKEN");
+            Captain(ship, actor);
+        }
+    }
+    public void DeleteEmptyShip(uint id)
+    {
+        lock (Sync) {
+            if (!ships.ContainsKey(id)) throw new RuleException("NOT_FOUND");
+            if (members.Values.Any(m => m.ShipId == id)) throw new RuleException("SHIP_OCCUPIED");
+            DeleteShip(id);
+        }
+    }
     public void DeleteShip(uint id)
     { lock (Sync) { foreach (var m in members.Values.Where(m => m.ShipId == id).ToArray()) Changed(m with { ShipId = null, IsCaptain = false }); ships.Remove(id); version++; } }
     public void SetStatus(uint id, MemberStatus status) { lock (Sync) { Changed(Get(id) with { Status = status }); version++; } }

@@ -85,3 +85,17 @@ public sealed class ConfirmationWindow : ToolWindow
     public static bool Ask(string title, string question, string confirm, Window? owner = null) =>
         new ConfirmationWindow(title, question, confirm, owner).ShowDialog() == true;
 }
+
+internal sealed class ShipEditor : ToolWindow
+{
+    public ShipEditor(Window owner, Ship? ship, Action<string,string> save, string? submitLabel = null) : base(ship == null ? "Přidat loď" : "Upravit loď")
+    {
+        Owner = owner;
+        Width = 520; Height = 445;
+        var name = Field("Název lodi", ship?.Name ?? "");
+        var model = new ShipModelPicker { Text = ship?.Model ?? "" };
+        Body.Children.Add(model);
+        Button(submitLabel ?? (ship == null ? "Vytvořit loď" : "Uložit změny"), () => { save(name.Text, model.Text); DialogResult = true; });
+        Loaded += (_, _) => name.Focus();
+    }
+}

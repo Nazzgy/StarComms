@@ -15,7 +15,7 @@
         <Grid Margin="8">
           <Grid.ColumnDefinitions><ColumnDefinition Width="2*" MinWidth="170"/><ColumnDefinition Width="3*"/></Grid.ColumnDefinitions>
           <DockPanel Margin="0,0,12,0">
-            <Button DockPanel.Dock="Top" Content="Přidat loď" x:Name="NewShip" Click="Create" Style="{StaticResource Primary}"/>
+            <Button DockPanel.Dock="Top" Content="Přidat loď" Tag="{StaticResource IconAdd}" ContentTemplate="{StaticResource IconLabel}" AutomationProperties.Name="Přidat loď" x:Name="NewShip" Click="Create" Style="{StaticResource Primary}"/>
             <ListBox x:Name="Ships" DisplayMemberPath="Name" SelectedValuePath="ShipId" AutomationProperties.Name="Lodě flotily" SelectionChanged="ShipChanged"/>
           </DockPanel>
           <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
@@ -30,7 +30,7 @@
                 <TextBlock Text="Posádka" FontSize="20" Margin="4,16,0,4"/>
                 <TextBlock x:Name="EmptyCrew" Text="Na palubě zatím nikdo není."/>
                 <ListBox x:Name="Crew" DisplayMemberPath="Label" SelectedValuePath="Id" MaxHeight="195" AutomationProperties.Name="Posádka vybrané lodi" SelectionChanged="CrewChanged"/>
-                <Button x:Name="Promote" Content="Jmenovat kapitánem" Click="Appoint"/>
+                <Button x:Name="Promote" Content="Jmenovat kapitánem" Tag="{StaticResource IconCaptain}" ContentTemplate="{StaticResource IconLabel}" AutomationProperties.Name="Jmenovat kapitánem" Click="Appoint"/>
                 <TextBlock Text="Přidat člena na palubu" FontSize="20" Margin="4,16,0,4"/>
                 <ComboBox x:Name="Boarding" DisplayMemberPath="Label" SelectedValuePath="Id" AutomationProperties.Name="Hráč k přesunu" SelectionChanged="BoardingChanged"/>
                 <Button x:Name="Board" Content="Přesunout na tuto loď" Click="Move"/>

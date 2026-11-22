@@ -12,6 +12,8 @@ public sealed class Settings
     public int SchemaVersion { get; set; } = 1;
     public string Nickname { get; set; } = "";
     public string LastAddress { get; set; } = "";
+    public string LastFleetInvitation { get; set; } = "";
+    public string LastFleetName { get; set; } = "";
     public string Input { get; set; } = "";
     public string Output { get; set; } = "";
     public int ActivationThresholdDb { get; set; } = VoiceActivation.DefaultThresholdDb;

@@ -21,6 +21,8 @@ public sealed class Host : IAsyncDisposable
         public DatagramCipher Out = new(credentials.UdpKeyH2C, credentials.NoncePrefixH2C, credentials.ConnectionId);
         public IPEndPoint? Endpoint;
         public bool VerifiedRemote;
+        public readonly long JoinedAt = Environment.TickCount64;
+        public bool ProbeOverdue;
         public List<(IPEndPoint Endpoint, byte[] Nonce, byte[] Challenge, long Stamp)> Probes = [];
         public BurstGuard Burst = new();
         public RateGate VoiceRate = new(75, 20);
@@ -45,6 +47,13 @@ public sealed class Host : IAsyncDisposable
     {
         get {
             lock (Fleet.Sync) return Fleet.Snapshot.Members.Where(m => peers.Values.Any(p => p.VerifiedRemote && p.Credentials.MemberId == m.MemberId))
+                .Select(m => m.Nickname).ToArray();
+        }
+    }
+    public string[] PlayersAwaitingVoice {
+        get {
+            lock (Fleet.Sync) return Fleet.Snapshot.Members.Where(m => !m.IsHost &&
+                peers.Values.Any(p => p.Credentials.MemberId == m.MemberId && p.ProbeOverdue && p.Endpoint == null))
                 .Select(m => m.Nickname).ToArray();
         }
     }
@@ -170,7 +179,20 @@ public sealed class Host : IAsyncDisposable
                         Result result;
                         try {
                             switch (e.Type) {
+                                case "DeleteEmptyShip": Fleet.DeleteEmptyShip(e.Read<DeleteEmptyShip>().ShipId); break;
+                                case "CreateShip":
+                                    var request = e.Read<CreateShip>();
+                                    var creator = Fleet.Get(member.MemberId);
+                                    if (creator.Status != MemberStatus.Online || creator.MembershipEpoch != request.ExpectedMembershipEpoch)
+                                        throw new RuleException("STALE_STATE");
+                                    var created = Fleet.CreateShip(request.Name ?? "", request.Model ?? "");
+                                    if (creator.ShipId == null) Fleet.Move(creator.MemberId, created.ShipId);
+                                    break;
                                 case "JoinShip": var j = e.Read<JoinShip>(); Fleet.Move(member.MemberId, j.ShipId, j.ExpectedMembershipEpoch); break;
+                                case "ClaimCaptain":
+                                    var claim = e.Read<ClaimCaptain>();
+                                    Fleet.ClaimCaptain(claim.ShipId, member.MemberId, claim.ExpectedMembershipEpoch);
+                                    break;
                                 case "TransferCaptain": var c = e.Read<TransferCaptain>(); Fleet.Captain(c.ShipId, c.NewCaptainMemberId, member.MemberId, c.ExpectedMembershipEpoch); break;
                                 default: throw new RuleException("FORBIDDEN");
                             }
@@ -247,6 +269,11 @@ public sealed class Host : IAsyncDisposable
     {
         try { using var timer = new PeriodicTimer(TimeSpan.FromSeconds(2)); while (await timer.WaitForNextTickAsync(stop.Token)) lock (Fleet.Sync) {
             foreach (var p in peers.Values) { if (Environment.TickCount64 - p.Pong > 6000) _ = p.Link.DisposeAsync(); else { p.Ping++; p.Link.Send("Ping", new { nonce = p.Ping }); } }
+            foreach (var p in peers.Values) {
+                if (p.Endpoint != null || p.ProbeOverdue || Environment.TickCount64 - p.JoinedAt < 6000) continue;
+                p.ProbeOverdue = true;
+                Changed?.Invoke();
+            }
             foreach (var r in reservations.Values.Where(r => r.Disconnected is long t && Environment.TickCount64 - t > 120000).ToArray()) { reservations.Remove(r.MemberId); Fleet.Remove(r.MemberId); Broadcast(); }
         } } catch (OperationCanceledException) { }
     }

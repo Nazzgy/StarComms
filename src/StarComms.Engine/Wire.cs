@@ -52,7 +52,7 @@ public sealed record Envelope(int V, string Type, Guid? Id, Guid? ReplyTo, JsonE
 public static class Wire
 {
     public static readonly JsonSerializerOptions Json = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase, MaxDepth = 16, RespectRequiredConstructorParameters = true, RespectNullableAnnotations = true, Converters = { new JsonStringEnumConverter() } };
-    static readonly HashSet<string> Types = ["ClientHello", "ServerHello", "AdmissionPending", "Accepted", "Rejected", "VoiceReady", "SnapshotRequest", "FleetSnapshot", "JoinShip", "TransferCaptain", "Result", "VoiceEnd", "Ping", "Pong", "Leave", "SessionEnded", "Removed"];
+    static readonly HashSet<string> Types = ["ClientHello", "ServerHello", "AdmissionPending", "Accepted", "Rejected", "VoiceReady", "SnapshotRequest", "FleetSnapshot", "JoinShip", "CreateShip", "DeleteEmptyShip", "ClaimCaptain", "TransferCaptain", "Result", "VoiceEnd", "Ping", "Pong", "Leave", "SessionEnded", "Removed"];
     public static async Task<Envelope> Read(Stream stream, CancellationToken ct)
     {
         byte[] prefix = new byte[4]; await stream.ReadExactlyAsync(prefix, ct); uint n = BinaryPrimitives.ReadUInt32BigEndian(prefix);
@@ -70,7 +70,10 @@ public static class Wire
 public sealed record Hello(int ProtocolVersion, string AppVersion, string Nickname, Guid? ResumeSessionId = null, string? ResumeToken = null);
 public sealed record ServerHello(int ProtocolVersion, string AppVersion, Guid SessionId, string FleetName, int Capacity = 12);
 public sealed record Accepted(uint MemberId, ulong ConnectionId, string ResumeToken, byte[] UdpKeyC2H, byte[] UdpKeyH2C, byte[] NoncePrefixC2H, byte[] NoncePrefixH2C, FleetSnapshot Snapshot);
+public sealed record DeleteEmptyShip(uint ShipId);
+public sealed record CreateShip(string Name, uint ExpectedMembershipEpoch, string Model = "");
 public sealed record JoinShip(uint ShipId, uint ExpectedMembershipEpoch);
+public sealed record ClaimCaptain(uint ShipId, uint ExpectedMembershipEpoch);
 public sealed record TransferCaptain(uint ShipId, uint NewCaptainMemberId, uint ExpectedMembershipEpoch);
 public sealed record Result(bool Ok, string? Code, ulong StateVersion);
 public sealed record VoiceEnd(uint SenderId, uint SenderEpoch, uint RecipientEpoch, VoiceChannel Channel, uint ShipId, ulong TalkBurstId, uint LastFrameIndex);

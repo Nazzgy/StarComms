@@ -45,14 +45,14 @@ try {
     $null = FindControl Button 'Připojit'
     "PASS start screen from standalone EXE in a path containing spaces and accents"
     InvokeButton 'Zvuk a nastavení'
-    $shipMode = (FindControl CheckBox 'Hlasová aktivace pro posádku').GetCurrentPattern([Windows.Automation.TogglePattern]::Pattern)
-    $commandMode = (FindControl CheckBox 'Hlasová aktivace pro kapitány').GetCurrentPattern([Windows.Automation.TogglePattern]::Pattern)
-    if ($shipMode.Current.ToggleState -ne 'On' -or $commandMode.Current.ToggleState -ne 'Off') { throw 'Unexpected voice mode defaults' }
+    $shipMode = (FindControl RadioButton 'Hlasová aktivace pro posádku').GetCurrentPattern([Windows.Automation.SelectionItemPattern]::Pattern)
+    $commandMode = (FindControl RadioButton 'Hlasová aktivace pro kapitány').GetCurrentPattern([Windows.Automation.SelectionItemPattern]::Pattern)
+    if (!$shipMode.Current.IsSelected -or $commandMode.Current.IsSelected) { throw 'Unexpected voice mode defaults' }
     $threshold = (FindControl Slider 'Práh hlasové aktivace').GetCurrentPattern([Windows.Automation.RangeValuePattern]::Pattern)
     if ($threshold.Current.Value -ne -35) { throw 'Unexpected microphone threshold' }
     $threshold.SetValue(-48)
-    $shipMode.Toggle()
-    $commandMode.Toggle()
+    (FindControl RadioButton 'Držet tlačítko pro posádku').GetCurrentPattern([Windows.Automation.SelectionItemPattern]::Pattern).Select()
+    $commandMode.Select()
     InvokeButton 'Hotovo'
     $null = FindControl Button 'Připojit'
     $saved = Get-Content (Join-Path $profilePath 'settings.json') -Raw | ConvertFrom-Json
@@ -91,12 +91,20 @@ try {
         $null = FindControl Button 'Správa flotily'
         "PASS published EXE hosting"
         $hostProcess = $p
-        InvokeButton 'Správa flotily'
         InvokeButton 'Přidat loď'
+        InvokeButton 'Zrušit'
+        InvokeButton 'Přidat loď'
+        InvokeButton 'Vytvořit loď'
         $shipName = FindControl Edit 'Název lodi'
         $shipName.GetCurrentPattern([Windows.Automation.ValuePattern]::Pattern).SetValue('Polaris')
         InvokeButton 'Vytvořit loď'
-        InvokeButton 'Zavřít'
+        $null = FindControl Text 'Tvoje loď'
+        'PASS first ship cancelled, blank name rejected, then host boarded'
+        if ($OtherBuild) {
+            InvokeButton 'Přidat loď'
+            (FindControl Edit 'Název lodi').GetCurrentPattern([Windows.Automation.ValuePattern]::Pattern).SetValue('Vulture')
+            InvokeButton 'Vytvořit loď'
+        }
         InvokeButton 'Podrobnosti připojení'
         $null = FindControl Button 'Kopírovat připojení'
         $windows = [Windows.Automation.AutomationElement]::RootElement.FindAll([Windows.Automation.TreeScope]::Children,
@@ -107,9 +115,8 @@ try {
         $pin = [regex]::Match($detail, '[0-9a-fA-F]{64}').Value
         if (!$port -or !$pin) { throw 'Host port/fingerprint missing' }
         InvokeButton 'Zavřít'
-        $hostShip = FindControl ListItem 'Polaris'
+        $hostShip = FindControl TreeItem 'Polaris'
         $hostShip.GetCurrentPattern([Windows.Automation.SelectionItemPattern]::Pattern).Select()
-        InvokeButton 'Přestoupit sem'
         $null = FindControl Text 'Tvoje loď'
         $playerProfile = "$profilePath-player"
         $start.ArgumentList[1] = $playerProfile
@@ -130,14 +137,15 @@ try {
                 $null=FindControl Text "Máš jiné sestavení než hostitel: $b / $a"
                 "PASS connected across compatible builds with both versions visible"
             }
-            $ship = FindControl ListItem 'Polaris' 
+            $shipType = if ($OtherBuild) { 'ListItem' } else { 'TreeItem' }
+            $ship = FindControl $shipType 'Polaris' 
             $ship.GetCurrentPattern([Windows.Automation.SelectionItemPattern]::Pattern).Select()
             InvokeButton 'Přestoupit sem'
             $null = FindControl Text 'Tvoje loď'
             "PASS second EXE joined with pinned invitation, approved and boarded Polaris"
             if (!$OtherBuild) {
                 InvokeButton 'Zvuk a nastavení'
-                (FindControl CheckBox 'Hlasová aktivace pro posádku').GetCurrentPattern([Windows.Automation.TogglePattern]::Pattern).Toggle()
+                (FindControl RadioButton 'Držet tlačítko pro posádku').GetCurrentPattern([Windows.Automation.SelectionItemPattern]::Pattern).Select()
                 InvokeButton 'Hotovo'
             }
             $surface = [Windows.Automation.AutomationElement]::FromHandle($p.MainWindowHandle)
@@ -158,8 +166,45 @@ try {
                 }
             } else { "NOT RUN live capture transfer: PTT unavailable" }
 
+            if (!$OtherBuild) {
+                InvokeButton 'Přidat loď'
+                (FindControl Edit 'Název lodi').GetCurrentPattern([Windows.Automation.ValuePattern]::Pattern).SetValue('Vulture')
+                InvokeButton 'Vytvořit loď'
+                $null = FindControl TreeItem 'Vulture'
+                'PASS ordinary crew member created a ship'
+            }
+            $p = $hostProcess
+            (FindControl TreeItem 'Testovací pilot').GetCurrentPattern([Windows.Automation.SelectionItemPattern]::Pattern).Select()
+            InvokeButton 'Jmenovat kapitánem'
+            $null = FindControl Text 'Lodi nyní velí Testovací pilot.'
+            (FindControl TreeItem 'Testovací pilot').GetCurrentPattern([Windows.Automation.SelectionItemPattern]::Pattern).Select()
+            $destination = FindControl ComboBox 'Cílová loď'
+            $destination.GetCurrentPattern([Windows.Automation.ExpandCollapsePattern]::Pattern).Expand()
+            $entries = $destination.FindAll([Windows.Automation.TreeScope]::Descendants,
+                [Windows.Automation.PropertyCondition]::new([Windows.Automation.AutomationElement]::ControlTypeProperty,[Windows.Automation.ControlType]::ListItem))
+            if ($entries.Count -ne 1) { throw "Expected one destination ship; found $($entries.Count)" }
+            $entries[0].GetCurrentPattern([Windows.Automation.SelectionItemPattern]::Pattern).Select()
+            InvokeButton 'Přesunout na loď'
+            $null = FindControl Text 'Testovací pilot je na palubě lodi Vulture.'
+            'PASS host appointed captain and moved player directly from crew list'
+            $p = $player
             InvokeButton 'Odpojit / ukončit hostování'
             $null = FindControl Button 'Připojit'
+            if (!$OtherBuild) {
+                $player.CloseMainWindow() | Out-Null
+                if (!$player.WaitForExit(6000)) { throw 'Player did not exit before relaunch' }
+                $player = [Diagnostics.Process]::Start($start)
+                $p = $player
+                (FindControl Edit 'Adresa nebo pozvánka od hostitele').GetCurrentPattern([Windows.Automation.ValuePattern]::Pattern).SetValue('invalid')
+                InvokeButton 'Znovu připojit: Večerní let'
+                $p = $hostProcess
+                InvokeButton 'Přijmout'
+                $p = $player
+                $null = FindControl TreeItem 'Polaris'
+                InvokeButton 'Odpojit / ukončit hostování'
+                $null = FindControl Button 'Připojit'
+                'PASS last fleet shortcut after restart with unrelated address in input'
+            }
         } finally {
             if (!$player.HasExited) { $player.CloseMainWindow() | Out-Null; if (!$player.WaitForExit(5000)) { $player.Kill() } }
             $p = $hostProcess

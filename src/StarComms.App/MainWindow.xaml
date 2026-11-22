@@ -1,4 +1,4 @@
-<Window xmlns:local="clr-namespace:StarComms.App" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Class="StarComms.App.MainWindow" Style="{StaticResource AppWindow}" Title="StarComms" Width="1100" Height="760" MinWidth="900" MinHeight="650">
+<Window xmlns:core="clr-namespace:StarComms.Core;assembly=StarComms.Core" xmlns:local="clr-namespace:StarComms.App" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Class="StarComms.App.MainWindow" Style="{StaticResource AppWindow}" Title="StarComms" Width="1100" Height="760" MinWidth="900" MinHeight="650">
   <Window.Resources>
     <local:SpeakingChannelConverter x:Key="SpeakingChannel"/>
     <DataTemplate x:Key="SpeakingMember">
@@ -30,14 +30,14 @@
     </DataTemplate>
   </Window.Resources>
   <DockPanel>
-    <Border DockPanel.Dock="Top" Background="#22252A" Padding="24,14">
+    <Border DockPanel.Dock="Top" Background="#22252A" Padding="14,4">
       <DockPanel>
         <Border Background="#203B40" CornerRadius="8" Padding="7,4" Margin="0,0,10,0">
           <Path Data="M2,10 L2,20 M8,5 L8,25 M14,2 L14,28 M20,6 L20,24 M26,10 L26,20" Stroke="#79D9E1" StrokeThickness="3" StrokeStartLineCap="Round" StrokeEndLineCap="Round" VerticalAlignment="Center"/>
         </Border>
-        <TextBlock Text="StarComms" FontSize="27" FontWeight="Bold"/>
+        <TextBlock Text="StarComms" FontSize="19" FontWeight="Bold"/>
         <TextBlock Text="{Binding ConnectedFleet}" VerticalAlignment="Center" Foreground="#C1C6CF" FontSize="19" Margin="16,0"/>
-        <Button DockPanel.Dock="Right" Content="Zvuk a nastavení" Command="{Binding SettingsCommand}" HorizontalAlignment="Right"/>
+        <Button DockPanel.Dock="Right" Content="Zvuk a nastavení" Tag="{StaticResource IconSound}" ContentTemplate="{StaticResource IconLabel}" AutomationProperties.Name="Zvuk a nastavení" Command="{Binding SettingsCommand}" HorizontalAlignment="Right"/>
         <TextBlock Text="{Binding Status}" Foreground="#C1C6CF" VerticalAlignment="Center" Margin="30,0"/>
       </DockPanel>
     </Border>
@@ -50,8 +50,11 @@
     <Grid>
       <ScrollViewer Visibility="{Binding StartVisible,Converter={StaticResource Visible}}" VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="24" MaxWidth="1120">
-          <TextBlock Text="Připoj se ke své flotile" FontSize="36" FontWeight="SemiBold"/>
-          <TextBlock Text="Stačí přezdívka a pozvánka od kamaráda." Foreground="#C1C6CF" FontSize="19"/>
+          <TextBlock Text="Připojení k flotile" FontSize="30" FontWeight="SemiBold"/>
+          <StackPanel MaxWidth="360" HorizontalAlignment="Left" MinWidth="280" Margin="0,8,0,0">
+                <TextBlock Text="Tvoje přezdívka"/>
+                <TextBox Text="{Binding Nickname,UpdateSourceTrigger=PropertyChanged}" MaxLength="100" AutomationProperties.Name="Tvoje přezdívka"/>
+          </StackPanel>
           <Grid Margin="0,14">
             <Grid.ColumnDefinitions>
               <ColumnDefinition Width="3*"/>
@@ -59,25 +62,25 @@
             </Grid.ColumnDefinitions>
             <Border Style="{StaticResource Panel}">
               <StackPanel>
-                <TextBlock Text="Tvoje přezdívka"/>
-                <TextBox Text="{Binding Nickname,UpdateSourceTrigger=PropertyChanged}" MaxLength="100" AutomationProperties.Name="Tvoje přezdívka"/>
+                <TextBlock Text="Připojit se k flotile" FontSize="22" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                <Button Content="{Binding LastFleetLabel}" Command="{Binding LastFleetCommand}" Visibility="{Binding ShowLastFleet,Converter={StaticResource Visible}}" Margin="0,0,0,12"/>
                 <TextBlock Text="Adresa nebo pozvánka od hostitele"/>
                 <DockPanel LastChildFill="True">
                   <Button DockPanel.Dock="Right" Content="Vložit" Command="{Binding PasteCommand}" Margin="8,4,0,12"/>
                   <TextBox Text="{Binding Address,UpdateSourceTrigger=PropertyChanged}" MaxLength="1024" AutomationProperties.Name="Adresa nebo pozvánka od hostitele"/>
                 </DockPanel>
-                <Button Content="Připojit" Command="{Binding ConnectCommand}" Style="{StaticResource Primary}"/>
+                <Button Content="Připojit" Tag="{StaticResource IconJoin}" ContentTemplate="{StaticResource IconLabel}" AutomationProperties.Name="Připojit" Command="{Binding ConnectCommand}" Style="{StaticResource Primary}"/>
                 <Button Content="Zrušit připojování" Command="{Binding CancelCommand}" Visibility="{Binding Busy,Converter={StaticResource Visible}}"/>
               </StackPanel>
             </Border>
             <Border Grid.Column="1" Style="{StaticResource Panel}">
               <StackPanel>
-                <TextBlock Text="Chci založit flotilu" FontSize="24"/>
+                <TextBlock Text="Založit vlastní flotilu" FontSize="22" FontWeight="SemiBold"/>
                 <TextBlock Text="Kamarádi se připojí k tvému počítači. Dostupnost z internetu se ověří až s konkrétním hráčem." Foreground="#C1C6CF"/>
                 <TextBlock Text="Název flotily"/>
                 <TextBox Text="{Binding FleetName}"/>
                 <Button Content="Chci hostovat" Command="{Binding HostCommand}"/>
-                <TextBlock Text="Hostování není spuštěné." Foreground="#F4C779"/>
+
                 <Expander Header="Podrobnosti připojení" Foreground="#C1C6CF">
                   <TextBlock Text="{Binding NetworkDetails}"/>
                 </Expander>
@@ -88,18 +91,30 @@
         </StackPanel>
       </ScrollViewer>
       <Grid Visibility="{Binding FleetVisible,Converter={StaticResource Visible}}" Margin="16">
+        <Grid.Resources>
+          <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}"><Setter Property="MinHeight" Value="28"/><Setter Property="Padding" Value="8,3"/><Setter Property="Margin" Value="2"/></Style>
+        </Grid.Resources>
         <Grid.RowDefinitions>
           <RowDefinition Height="Auto"/>
           <RowDefinition Height="*"/>
           <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <StackPanel>
-          <TextBlock Text="{Binding VersionWarning}" Foreground="#F4C779"/>
+          <TextBlock Text="{Binding VersionWarning}" Foreground="#F4C779">
+            <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers>
+              <DataTrigger Binding="{Binding Text,RelativeSource={RelativeSource Self}}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger>
+            </Style.Triggers></Style></TextBlock.Style>
+          </TextBlock>
+          <TextBlock Foreground="#F4C779" Text="{Binding HostVoiceHint}" TextWrapping="Wrap">
+            <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers>
+              <DataTrigger Binding="{Binding HostVoiceHint}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger>
+            </Style.Triggers></Style></TextBlock.Style>
+          </TextBlock>
           <TextBlock Text="{Binding HostStatus}" Visibility="{Binding IsHost,Converter={StaticResource Visible}}"/>
           <WrapPanel>
-            <Button Content="Kopírovat pozvánku" Command="{Binding CopyInvitationCommand}" Visibility="{Binding IsHost,Converter={StaticResource Visible}}"/>
+            <Button Content="Kopírovat pozvánku" Tag="{StaticResource IconInvite}" ContentTemplate="{StaticResource IconLabel}" AutomationProperties.Name="Kopírovat pozvánku" Command="{Binding CopyInvitationCommand}" Visibility="{Binding IsHost,Converter={StaticResource Visible}}"/>
             <Button Content="Podrobnosti připojení" Command="{Binding InvitationCommand}" Visibility="{Binding IsHost,Converter={StaticResource Visible}}"/>
-            <Button Content="Správa flotily" Command="{Binding AdminCommand}" Visibility="{Binding IsHost,Converter={StaticResource Visible}}"/>
+            <Button Content="Správa flotily" Tag="{StaticResource IconFleet}" ContentTemplate="{StaticResource IconLabel}" AutomationProperties.Name="Správa flotily" Command="{Binding AdminCommand}" Visibility="{Binding IsHost,Converter={StaticResource Visible}}"/>
             <Button Content="Zkusit hlas znovu" Command="{Binding ProbeCommand}" Visibility="{Binding NeedsProbe,Converter={StaticResource Visible}}"/>
             <Button Content="Obnovit spojení" Command="{Binding RetryCommand}" Visibility="{Binding CanRetry,Converter={StaticResource Visible}}"/>
             <Button Content="Odpojit / ukončit hostování" Command="{Binding LeaveCommand}"/>
@@ -118,95 +133,106 @@
           </ItemsControl>
           </ScrollViewer>
         </StackPanel>
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <Grid>
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="215"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="Auto"/>
-          </Grid.ColumnDefinitions>
-          <StackPanel>
-            <TextBlock Text="Lodě flotily" FontSize="22"/>
-            <ListBox ItemsSource="{Binding ShipCards}" SelectedValuePath="ShipId" SelectedValue="{Binding SelectedShipId}" MinHeight="95" MaxHeight="340">
-              <ListBox.ItemContainerStyle>
-                <Style TargetType="ListBoxItem">
-                  <Setter Property="AutomationProperties.Name" Value="{Binding Name}"/>
-                </Style>
-              </ListBox.ItemContainerStyle>
-              <ListBox.ItemTemplate>
-                <DataTemplate>
-                  <StackPanel Margin="5">
-                    <TextBlock Text="Na palubě" Foreground="#79D9E1" FontSize="12" FontWeight="SemiBold" Visibility="{Binding IsOwnShip,Converter={StaticResource Visible}}"/>
-                    <DockPanel>
-                      <TextBlock Text="{Binding Count,StringFormat='{}{0} os.'}" DockPanel.Dock="Right" Margin="6,0" Foreground="#C1C6CF"/>
-                      <TextBlock Text="{Binding Name}" FontSize="19" FontWeight="SemiBold"/>
-                    </DockPanel>
-                    <TextBlock Text="{Binding Model}" Foreground="#C1C6CF"/>
-                    <TextBlock Text="{Binding Captain}" Foreground="#C1C6CF"/>
+        <Grid Grid.Row="1" Margin="0,6">
+          <Grid.ColumnDefinitions><ColumnDefinition Width="2*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+          <DockPanel Margin="0,0,10,0">
+            <DockPanel DockPanel.Dock="Top" Background="#25292F">
+              <Button DockPanel.Dock="Right" Content="＋ Přidat loď" AutomationProperties.Name="Přidat loď" Command="{Binding FirstShipCommand}"/>
+              <TextBlock Text="Lodě flotily" FontWeight="SemiBold" Margin="10,0" VerticalAlignment="Center"/>
+            </DockPanel>
+            <TreeView ItemsSource="{Binding ShipCards}" SelectedItemChanged="FleetSelection" Background="#191B1F" Foreground="#F4F5F6" BorderThickness="0">
+              <TreeView.Resources>
+                <HierarchicalDataTemplate DataType="{x:Type local:ShipCard}" ItemsSource="{Binding Members}">
+                  <HierarchicalDataTemplate.ItemContainerStyle>
+                    <Style TargetType="TreeViewItem">
+                      <Setter Property="AutomationProperties.Name" Value="{Binding Nickname}"/>
+                      <Setter Property="Foreground" Value="#F4F5F6"/>
+                      <EventSetter Event="PreviewMouseLeftButtonUp" Handler="FleetRowClicked"/>
+                    </Style>
+                  </HierarchicalDataTemplate.ItemContainerStyle>
+                  <StackPanel Orientation="Horizontal" Margin="2" Background="Transparent" Tag="{Binding DataContext,RelativeSource={RelativeSource AncestorType=Window}}">
+                    <StackPanel.ContextMenu>
+                      <ContextMenu DataContext="{Binding PlacementTarget.DataContext,RelativeSource={RelativeSource Self}}" Background="#25292F" Foreground="#F4F5F6">
+                        <MenuItem Header="Přestoupit sem" Command="{Binding PlacementTarget.Tag.JoinCommand,RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding ShipId}">
+                          <MenuItem.Style><Style TargetType="MenuItem"><Style.Triggers>
+                            <DataTrigger Binding="{Binding IsOwnShip}" Value="True"><Setter Property="IsEnabled" Value="False"/></DataTrigger>
+                          </Style.Triggers></Style></MenuItem.Style>
+                        </MenuItem>
+                        <MenuItem Header="Stát se kapitánem" Visibility="{Binding CanClaimCaptain,Converter={StaticResource Visible}}" Command="{Binding PlacementTarget.Tag.ClaimCaptainCommand,RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding ShipId}"/>
+                        <MenuItem Header="Smazat prázdnou loď" Command="{Binding PlacementTarget.Tag.DeleteEmptyShipCommand,RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding ShipId}">
+                          <MenuItem.Style><Style TargetType="MenuItem"><Setter Property="IsEnabled" Value="False"/><Style.Triggers>
+                            <DataTrigger Binding="{Binding Members.Length}" Value="0"><Setter Property="IsEnabled" Value="True"/></DataTrigger>
+                          </Style.Triggers></Style></MenuItem.Style>
+                        </MenuItem>
+                      </ContextMenu>
+                    </StackPanel.ContextMenu>
+                    <Path Style="{StaticResource LineIcon}" Data="{StaticResource IconShip}"/>
+                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding Model}" Margin="6,4,0,4" Foreground="#C1C6CF"/>
+                    <TextBlock Text="Tvoje loď" Margin="10,4" Foreground="#79D9E1" Visibility="{Binding IsOwnShip,Converter={StaticResource Visible}}"/>
+                    <TextBlock Text="{Binding Members.Length}" Margin="8,4" Foreground="#C1C6CF"/>
+                  </StackPanel>
+                </HierarchicalDataTemplate>
+                <DataTemplate DataType="{x:Type core:Member}">
+                  <StackPanel Orientation="Horizontal">
+                    <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource SpeakingMember}"/>
+                    <TextBlock Text="Kapitán" Margin="10,4" Foreground="#F4C779" Visibility="{Binding IsCaptain,Converter={StaticResource Visible}}"/>
+                    <TextBlock Text="Obnovuje spojení"><TextBlock.Style><Style TargetType="TextBlock">
+                      <Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding Status}" Value="Reconnecting"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers>
+                    </Style></TextBlock.Style></TextBlock>
                   </StackPanel>
                 </DataTemplate>
-              </ListBox.ItemTemplate>
-            </ListBox>
-            <TextBlock Text="{Binding EmptyShips}"/>
-
-          </StackPanel>
-          <StackPanel Grid.Column="1" Margin="24,0">
-            <DockPanel>
-              <Button DockPanel.Dock="Right" Content="Přestoupit sem" Command="{Binding JoinCommand}" Visibility="{Binding CanBoard,Converter={StaticResource Visible}}"/>
-              <TextBlock Text="{Binding SelectedShip.Name}" FontSize="27"/>
-            </DockPanel>
-            <TextBlock Text="{Binding SelectedShip.Model}" Foreground="#C1C6CF"/>
-            <TextBlock Text="{Binding ShipContext}" Foreground="#79D9E1" Margin="0,4,0,12"/>
-            <ListBox ItemsSource="{Binding Crew}" SelectedItem="{Binding SelectedMember}" MinHeight="80" MaxHeight="290">
-              <ListBox.ItemContainerStyle>
-                <Style TargetType="ListBoxItem">
+                <Style TargetType="TreeViewItem" BasedOn="{StaticResource {x:Type TreeViewItem}}">
+                  <Setter Property="Foreground" Value="#F4F5F6"/>
+                  <EventSetter Event="PreviewMouseLeftButtonUp" Handler="FleetRowClicked"/>
                   <Setter Property="AutomationProperties.Name" Value="{Binding Nickname}"/>
                 </Style>
-              </ListBox.ItemContainerStyle>
-              <ListBox.ItemTemplate>
-                <DataTemplate>
-                  <WrapPanel>
-                    <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource SpeakingMember}"/>
-                    <TextBlock Text="Kapitán" Margin="12,4" Foreground="#F4C779" Visibility="{Binding IsCaptain,Converter={StaticResource Visible}}"/>
-                    <TextBlock Text="Hostitel" Margin="8,4" Visibility="{Binding IsHost,Converter={StaticResource Visible}}"/>
-                    <TextBlock Text="Obnovuje spojení">
-                      <TextBlock.Style>
-                        <Style TargetType="TextBlock">
-                          <Setter Property="Visibility" Value="Collapsed"/>
-                          <Style.Triggers>
-                            <DataTrigger Binding="{Binding Status}" Value="Reconnecting">
-                              <Setter Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-                          </Style.Triggers>
-                        </Style>
-                      </TextBlock.Style>
-                    </TextBlock>
-                  </WrapPanel>
-                </DataTemplate>
-              </ListBox.ItemTemplate>
-            </ListBox>
+              </TreeView.Resources>
+              <TreeView.ItemContainerStyle><Style TargetType="TreeViewItem" BasedOn="{StaticResource {x:Type TreeViewItem}}">
+                <Setter Property="IsExpanded" Value="{Binding Expanded,Mode=TwoWay}"/>
+                <Setter Property="AutomationProperties.Name" Value="{Binding Name}"/>
+              </Style></TreeView.ItemContainerStyle>
+            </TreeView>
+          </DockPanel>
+          <ScrollViewer Grid.Column="1" Background="#22252A" Padding="12,6" VerticalScrollBarVisibility="Auto">
+          <Grid>
+            <StackPanel Visibility="{Binding CreatingShip,Converter={StaticResource Visible}}">
+              <TextBlock Text="Nová loď" FontSize="17" FontWeight="SemiBold"/>
+              <TextBlock Text="Název lodi"/>
+              <TextBox AutomationProperties.Name="Název lodi" Text="{Binding DraftName,UpdateSourceTrigger=PropertyChanged}" MinHeight="30" Padding="6"/>
+              <local:ShipModelPicker Text="{Binding DraftModel,Mode=TwoWay}"/>
+              <TextBlock Text="Posádka získá vlastní hlasový kanál."/>
+              <WrapPanel><Button Content="Vytvořit loď" Command="{Binding SaveShipCommand}"/><Button Content="Zrušit" Command="{Binding CancelShipCommand}"/></WrapPanel>
+            </StackPanel>
+            <StackPanel><StackPanel.Style><Style TargetType="StackPanel"><Style.Triggers><DataTrigger Binding="{Binding CreatingShip}" Value="True"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></StackPanel.Style>
+            <TextBlock Text="{Binding SelectedShip.Name}" FontSize="17" FontWeight="SemiBold"/>
+            <TextBlock Text="{Binding SelectedShip.Model}"/>
+            <TextBlock Text="{Binding ShipContext}" Foreground="#79D9E1"/>
+            <Button HorizontalAlignment="Left" Content="Stát se kapitánem" Visibility="{Binding CanClaimCaptain,Converter={StaticResource Visible}}" Command="{Binding ClaimCaptainCommand}" CommandParameter="{Binding SelectedShipId}"/>
+            <Button HorizontalAlignment="Left" Content="Přestoupit sem" Command="{Binding JoinCommand}" Visibility="{Binding CanBoard,Converter={StaticResource Visible}}"/>
             <StackPanel Visibility="{Binding MemberSelected,Converter={StaticResource Visible}}">
-              <TextBlock Text="Hlasitost vybraného člena (0–200 %)"/>
+              <TextBlock Text="{Binding SelectedMember.Nickname,StringFormat=Hlasitost · {0}}"/>
               <Slider Minimum="0" Maximum="2" Value="{Binding MemberVolume}"/>
+              <WrapPanel Visibility="{Binding IsHost,Converter={StaticResource Visible}}">
+                <Button Content="Jmenovat kapitánem" Tag="{StaticResource IconCaptain}" ContentTemplate="{StaticResource IconLabel}" AutomationProperties.Name="Jmenovat kapitánem" Command="{Binding AppointCommand}" Visibility="{Binding CanAppoint,Converter={StaticResource Visible}}"/>
+                <WrapPanel>
+                  <WrapPanel.Style><Style TargetType="WrapPanel"><Style.Triggers>
+                    <DataTrigger Binding="{Binding OtherShips.Length}" Value="0"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger>
+                  </Style.Triggers></Style></WrapPanel.Style>
+                <ComboBox x:Name="CrewDestinationShip" AutomationProperties.Name="Cílová loď" DisplayMemberPath="Name" ItemsSource="{Binding OtherShips}" MinWidth="130" Margin="4" ToolTip="Vyber cílovou loď"/>
+                <Button Content="Přesunout na loď" Command="{Binding MoveCrewCommand}" CommandParameter="{Binding SelectedItem, ElementName=CrewDestinationShip}">
+                  <Button.Style><Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}"><Style.Triggers>
+                    <DataTrigger Binding="{Binding SelectedItem, ElementName=CrewDestinationShip}" Value="{x:Null}"><Setter Property="IsEnabled" Value="False"/></DataTrigger>
+                  </Style.Triggers></Style></Button.Style>
+                </Button>
+                </WrapPanel>
+              </WrapPanel>
             </StackPanel>
-            <Button Content="Předat velení vybranému členovi" Command="{Binding TransferCommand}" Visibility="{Binding CanTransfer,Converter={StaticResource Visible}}"/>
+            <Button HorizontalAlignment="Left" Content="Předat velení vybranému členovi" Command="{Binding TransferCommand}" Visibility="{Binding CanTransfer,Converter={StaticResource Visible}}"/>
           </StackPanel>
-          <Border Grid.Column="2" Width="210" Style="{StaticResource Panel}" Padding="12" Visibility="{Binding IsCaptain,Converter={StaticResource Visible}}">
-            <StackPanel>
-              <TextBlock Text="Kapitáni" FontSize="23" Foreground="#F4C779"/>
-              <TextBlock Text="Soukromý kanál"/>
-              <ItemsControl ItemsSource="{Binding Captains}">
-                <ItemsControl.ItemTemplate>
-                  <DataTemplate>
-                    <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource SpeakingMember}" Margin="4,8"/>
-                  </DataTemplate>
-                </ItemsControl.ItemTemplate>
-              </ItemsControl>
-            </StackPanel>
-          </Border>
+          </Grid></ScrollViewer>
         </Grid>
-        </ScrollViewer>
-        <Border Grid.Row="2" Background="#22252A" CornerRadius="10" Padding="12,6" Margin="0,8,0,0">
+        <Border Grid.Row="2" Background="#22252A" CornerRadius="4" Padding="8,2" Margin="0,3,0,0">
           <Border.Resources>
             <Style x:Key="RadioButtonStyle" TargetType="Button">
               <Setter Property="Foreground" Value="#F4F5F6"/>
@@ -246,16 +272,22 @@
             </DockPanel>
             <WrapPanel VerticalAlignment="Center">
               <Button x:Name="ShipTalk" Background="#203B40" BorderBrush="#599CA4" Style="{StaticResource RadioButtonStyle}" IsEnabled="{Binding CanTalk}">
+                <DockPanel>
+                  <Path Style="{StaticResource LineIcon}" Data="{StaticResource IconShip}"/>
                 <StackPanel>
                   <TextBlock Text="{Binding CrewDestination}" FontSize="14" FontWeight="SemiBold" Margin="0"/>
                   <TextBlock Text="{Binding ShipKey}" FontSize="12" Margin="0,1,0,0"/>
                 </StackPanel>
+                </DockPanel>
               </Button>
               <Button x:Name="CommandTalk" Background="#332B1E" BorderBrush="#A98A51" Style="{StaticResource RadioButtonStyle}" Visibility="{Binding IsCaptain,Converter={StaticResource Visible}}" IsEnabled="{Binding CanCommand}">
+                <DockPanel>
+                  <Path Style="{StaticResource LineIcon}" Data="{StaticResource IconCaptain}"/>
                 <StackPanel>
                   <TextBlock Text="Mluvit ke kapitánům" FontSize="14" FontWeight="SemiBold" Margin="0"/>
                   <TextBlock Text="{Binding CommandKey}" FontSize="12" Margin="0,1,0,0"/>
                 </StackPanel>
+                </DockPanel>
               </Button>
               <Button Content="{Binding MicrophoneAction}" Command="{Binding MuteCommand}" Style="{StaticResource RadioButtonStyle}" Background="#30343B" BorderBrush="#606773" MinHeight="35" VerticalAlignment="Center"/>
             </WrapPanel>
@@ -275,7 +307,7 @@
                 <StackPanel>
                   <TextBlock Text="Zvuková zařízení" FontSize="21" FontWeight="SemiBold" Margin="0,0,0,12"/>
                   <TextBlock Text="Mikrofon"/>
-          <ComboBox MinHeight="40" Margin="0,4,0,12" ItemsSource="{Binding Inputs}" SelectedValuePath="Id" DisplayMemberPath="Name" SelectedValue="{Binding InputId}"/>
+          <ComboBox MinHeight="40" Margin="0,4,0,12" AutomationProperties.Name="Mikrofon" ItemsSource="{Binding Inputs}" SelectedValuePath="Id" DisplayMemberPath="Name" SelectedValue="{Binding InputId}"/>
           <TextBlock Text="Místní test mikrofonu" FontWeight="SemiBold"/>
           <Grid Height="12" Margin="0,4">
             <ProgressBar Minimum="-65" Maximum="0" Value="{Binding Level,Mode=OneWay}"/>
@@ -289,7 +321,7 @@
           <TextBlock Text="Doleva pro tišší řeč, doprava pro hlučnější okolí." Foreground="#C1C6CF"/>
           <TextBlock Text="{Binding DeviceStatus}" Foreground="#C1C6CF" AutomationProperties.AutomationId="DeviceStatus"/>
           <TextBlock Text="Sluchátka"/>
-          <ComboBox MinHeight="40" Margin="0,4,0,12" ItemsSource="{Binding Outputs}" SelectedValuePath="Id" DisplayMemberPath="Name" SelectedValue="{Binding OutputId}"/>
+          <ComboBox MinHeight="40" Margin="0,4,0,12" AutomationProperties.Name="Sluchátka" ItemsSource="{Binding Outputs}" SelectedValuePath="Id" DisplayMemberPath="Name" SelectedValue="{Binding OutputId}"/>
           <WrapPanel>
             <Button Content="Použít vybraná zařízení" Command="{Binding DevicesCommand}"/>
             <Button Content="Vyzkoušet zvuk" Command="{Binding ToneCommand}"/>
@@ -299,21 +331,35 @@
               <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource Panel}" Padding="18" VerticalAlignment="Top">
                 <StackPanel>
                   <TextBlock Text="Způsob vysílání" FontSize="21" FontWeight="SemiBold" Margin="0,0,0,12"/>
-                  <TextBlock Text="Zapnuto: hlasová aktivace. Vypnuto: držení tlačítka (PTT)." />
-          <CheckBox Content="Hlasová aktivace pro posádku" IsChecked="{Binding ShipAutomatic}" Margin="4,8"/>
-          <Button Content="{Binding ShipBindingLabel}" Command="{Binding BindShipCommand}"/>
-          <CheckBox Content="Hlasová aktivace pro kapitány" IsChecked="{Binding CommandAutomatic}" Margin="4,8"/>
-          <Button Content="{Binding CommandBindingLabel}" Command="{Binding BindCommandCommand}"/>
+                  <DockPanel Margin="0,8,0,4">
+                    <Path Data="{StaticResource IconShip}" Style="{StaticResource LineIcon}" Stroke="#79D9E1"/>
+                    <TextBlock Text="Posádka" FontWeight="SemiBold"/>
+                  </DockPanel>
+                  <WrapPanel>
+                    <RadioButton GroupName="ShipMode" Content="Hlasová aktivace" AutomationProperties.Name="Hlasová aktivace pro posádku" IsChecked="{Binding ShipAutomatic}" Margin="0,6,14,6"/>
+                    <RadioButton GroupName="ShipMode" Content="Držet tlačítko" AutomationProperties.Name="Držet tlačítko pro posádku" IsChecked="{Binding ShipPtt}" Margin="0,6"/>
+                  </WrapPanel>
+                  <Button Content="{Binding ShipBindingLabel}" Command="{Binding BindShipCommand}" HorizontalAlignment="Left" Visibility="{Binding ShipPtt,Converter={StaticResource Visible}}"/>
+                  <Separator Margin="0,8"/>
+                  <DockPanel Margin="0,8,0,4">
+                    <Path Data="{StaticResource IconCaptain}" Style="{StaticResource LineIcon}" Stroke="#F4C779"/>
+                    <TextBlock Text="Kapitáni" FontWeight="SemiBold"/>
+                  </DockPanel>
+                  <WrapPanel>
+                    <RadioButton GroupName="CommandMode" Content="Hlasová aktivace" AutomationProperties.Name="Hlasová aktivace pro kapitány" IsChecked="{Binding CommandAutomatic}" Margin="0,6,14,6"/>
+                    <RadioButton GroupName="CommandMode" Content="Držet tlačítko" AutomationProperties.Name="Držet tlačítko pro kapitány" IsChecked="{Binding CommandPtt}" Margin="0,6"/>
+                  </WrapPanel>
+                  <Button Content="{Binding CommandBindingLabel}" Command="{Binding BindCommandCommand}" HorizontalAlignment="Left" Visibility="{Binding CommandPtt,Converter={StaticResource Visible}}"/>
                 </StackPanel>
               </Border>
               <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource Panel}" Padding="18" VerticalAlignment="Top">
                 <StackPanel>
                   <TextBlock Text="Hlasitost" FontSize="21" FontWeight="SemiBold" Margin="0,0,0,12"/>
-                  <TextBlock Text="Hlasitost posádky (0–200 %)"/>
-          <Slider Minimum="0" Maximum="2" Value="{Binding ShipVolume}"/>
+                  <TextBlock Text="{Binding ShipVolume,StringFormat='Hlasitost posádky · {0:P0}'}"/>
+          <Slider Minimum="0" Maximum="2" Value="{Binding ShipVolume}" AutomationProperties.Name="Hlasitost posádky"/>
           <StackPanel Visibility="{Binding IsCaptain,Converter={StaticResource Visible}}">
-            <TextBlock Text="Hlasitost kapitánů (0–200 %)"/>
-            <Slider Minimum="0" Maximum="2" Value="{Binding CommandVolume}"/>
+            <TextBlock Text="{Binding CommandVolume,StringFormat='Hlasitost kapitánů · {0:P0}'}"/>
+            <Slider Minimum="0" Maximum="2" Value="{Binding CommandVolume}" AutomationProperties.Name="Hlasitost kapitánů"/>
             <CheckBox Margin="4,12" Content="Při hovoru kapitánů ztišit posádku" IsChecked="{Binding Ducking}"/>
           </StackPanel>
                 </StackPanel>

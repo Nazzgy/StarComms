@@ -15,6 +15,66 @@ public sealed class ConnectionTests
     }
 
     [Fact]
+    public async Task CrewCanCreateShipsAndKeepTheirCurrentSeat()
+    {
+        using var cert = Certificates.Create();
+        await using var host = new Host("Let", cert);
+        host.Start();
+        await using var observer = await host.ConnectLocal("Hostitel");
+        await using var player = new Client();
+        host.Changed += () => { foreach (var request in host.Pending) host.Decide(request.Id, true); };
+        await player.Connect(new(IPAddress.Loopback, host.Port, host.Fingerprint), "Pilot");
+        var initial = player.Self!.MembershipEpoch;
+        await player.Mutate("CreateShip", new CreateShip("Polaris", initial));
+        await Until(() => player.Self?.ShipId != null);
+        var seat = player.Self!.ShipId;
+        Assert.False(player.Self.IsHost);
+        Assert.False(player.Self.IsCaptain);
+        await Assert.ThrowsAsync<RuleException>(() => player.Mutate("CreateShip", new CreateShip("Stará žádost", initial)));
+        await player.Mutate("CreateShip", new CreateShip("Záchrana", player.Self.MembershipEpoch, "Cutlass Red"));
+        await Until(() => observer.Snapshot?.Ships.Length == 2);
+        Assert.Equal(seat, host.Fleet.Get(player.MemberId).ShipId);
+        var vulture = observer.Snapshot!.Ships.Single(s => s.Name == "Záchrana");
+        Assert.Equal("Cutlass Red", vulture.Model);
+        await observer.Mutate("JoinShip", new JoinShip(vulture.ShipId, observer.Self!.MembershipEpoch));
+        var occupied = await Assert.ThrowsAsync<RuleException>(() => player.Mutate("DeleteEmptyShip", new DeleteEmptyShip(vulture.ShipId)));
+        Assert.Equal("SHIP_OCCUPIED", occupied.Message);
+        await observer.Mutate("JoinShip", new JoinShip(seat!.Value, host.Fleet.Get(observer.MemberId).MembershipEpoch));
+        await player.Mutate("DeleteEmptyShip", new DeleteEmptyShip(vulture.ShipId));
+        await Until(() => observer.Snapshot?.Ships.Length == 1);
+        Assert.Equal(seat, observer.Snapshot!.Ships.Single().ShipId);
+    }
+
+    [Fact]
+    public async Task OnlyOneCrewMemberWinsCaptainClaim()
+    {
+        using var cert = Certificates.Create();
+        await using var host = new Host("Let", cert);
+        host.Start();
+        host.Changed += () => { foreach (var request in host.Pending) host.Decide(request.Id, true); };
+        var address = new JoinAddress(IPAddress.Loopback, host.Port, host.Fingerprint);
+        await using var a = new Client();
+        await using var b = new Client();
+        await a.Connect(address, "Alfa");
+        await b.Connect(address, "Bravo");
+        await a.Mutate("CreateShip", new CreateShip("Polaris", a.Self!.MembershipEpoch));
+        await Until(() => a.Self?.ShipId != null);
+        var ship = a.Self!.ShipId!.Value;
+        async Task<string?> Claim(Client player) {
+            try { await player.Mutate("ClaimCaptain", new ClaimCaptain(ship, player.Self!.MembershipEpoch)); return null; }
+            catch (RuleException ex) { return ex.Message; }
+        }
+        Assert.Equal("FORBIDDEN", await Claim(b));
+        await b.Mutate("JoinShip", new JoinShip(ship, b.Self!.MembershipEpoch));
+        await Until(() => b.Self?.ShipId == ship);
+        var outcomes = await Task.WhenAll(Claim(a), Claim(b));
+        Assert.Single(outcomes, result => result == null);
+        Assert.Single(outcomes, result => result == "CAPTAIN_TAKEN");
+        var winner = Assert.Single(host.Fleet.Snapshot.Members, member => member.IsCaptain);
+        Assert.Equal(winner.MemberId, host.Fleet.Snapshot.Ships.Single().CaptainMemberId);
+    }
+
+    [Fact]
     public async Task CancelPendingThenConnectAndLeave()
     {
         using var cert = Certificates.Create();
@@ -72,6 +132,7 @@ public sealed class ConnectionTests
         var first = await Bridge();
         await connect;
         Assert.False(pilot.VoiceReady);
+        await Until(() => host.PlayersAwaitingVoice.SequenceEqual(new[] { "Kapitán" }));
         var forward = Task.Run(async () => {
             IPEndPoint? remote = null;
             var server = new IPEndPoint(IPAddress.Loopback, host.Port);
@@ -85,6 +146,7 @@ public sealed class ConnectionTests
             } catch (OperationCanceledException) { }
         });
         await pilot.Probe();
+        Assert.Empty(host.PlayersAwaitingVoice);
         Assert.True(pilot.VoiceReady);
         uint originalId = pilot.MemberId;
         uint ship = 0;

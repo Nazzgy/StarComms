@@ -1,8 +1,8 @@
 # StarComms pro Windows x64 — stav ověření
 
-Distribuční soubor **artifacts/StarComms.exe** má verzi **0.1.0+20261120.101757**, velikost **142035400 bajtů** a SHA-256 **c1d72ea84a2f05ab65d428908d038ad46e20ebce109b0008d7a7e9de2451b30c**. Adresář obj/publish/win-x64 při kontrole obsahoval jen StarComms.exe. EXE je samostatná WPF aplikace s přibaleným runtime.
+Distribuční soubor **artifacts/StarComms.exe** má verzi **0.1.0+20261122.131158**, velikost **142061000 bajtů** a SHA-256 **7c67bc09a6c3d5b3f6b510542fb4b4ab487153b5fc35a9a0c47aef86c61e7549**. Adresář obj/publish/win-x64 při kontrole obsahoval jen StarComms.exe. EXE je samostatná WPF aplikace s přibaleným runtime.
 
-Základ pracovního stromu je commit 073e5eee0489c71fcd0422cc1fa9211942523a6e. Místní změny nejsou commitnuty. Windows x64 10.0.26200, .NET SDK 10.0.400. NuGet restore dokončil uživatel. Lokální build následně použil obnovené balíčky.
+Základ pracovního stromu je commit 16fea41. Místní změny nejsou commitnuty. Windows x64 10.0.26200, .NET SDK 10.0.400. NuGet restore dokončil uživatel. Lokální build následně použil obnovené balíčky.
 
 ## Ověření hlasových kanálů
 
@@ -122,3 +122,19 @@ Na čistých Windows bez SDK zkopíruj jen EXE do prázdné složky a spusť je 
 Ověření zápisu profilu: uložení a načtení nastavení, opětovné otevření identity DPAPI a místní připojení k hostiteli přes TLS prošly.
 
 Hlasový panel: zkontrolovány vypočtené barvy zakázaných tlačítek WPF a jejich rozměry bez snímání obrazovky.
+
+Build 20261122.122929: Dvě instance na Windows ověřily jmenování kapitána a přesun z hlavního seznamu posádky. Simulace 12 klientů za 60 s zaznamenala 93 215 doručení a 0 neoprávněných příjmů.
+
+Build 20261122.123414: UI test ve Windows ukončil klienta, znovu ho spustil a připojil k poslední flotile i po přepsání adresy v poli. Hostitel znovu schválil připojení.
+
+Build 20261122.135414 – kompaktní strom lodí a posádek, založení lodi každým hráčem. SHA-256 EXE 56DA5D154AA8BB1CF6A97AF3FEC64001CF2F7EC146349E22593F07DC8F51AE32. ZIP obsahuje jediný EXE se shodným hashem. 54/54 testů prošlo, síťová simulace 12 klientů za 60 s zaznamenala 93 427 doručení a 0 neoprávněných příjmů. Finální Windows EXE samostatně ověřeno pomocí UI Automation (hostování, vytvoření Polaris, člen posádky ve stromu). Plný dvouoknový UI skript nebylo možné spustit kvůli odepřenému přístupu k souboru. Dvě domácí sítě a Star Citizen netestovány.
+
+Build 20261122.135924 – kontextová nabídka lodi. 54/54 automatických testů prošlo včetně přestupu, zamítnutí smazání po nástupu hráče a následného smazání prázdné lodi běžným členem. EXE spuštěno, automatický test pravého kliknutí nedokončen, testovací okno překryté. SHA-256 CB5F7C4263D2058A1D3E922D864E961E9773F7D3E171EB1669909FA08D99BA4E.
+
+0.1.0+20261122.140814 — 55/55 testů. Dva běžní klienti žádali o velení na stejné lodi, uspěl právě jeden. Windows UI: vytvoření lodi, kliknutí na Stát se kapitánem a zobrazení role prošlo. SHA-256 D1D5CE569E25E126F7BB67F2041E7F2EDF085F18D278A68E0A2727EC42BB2734.
+
+0.1.0+20261122.141327 — výběr ze 192 modelů offline. 55/55 testů, síťový test ověřil typ u druhého klienta. Windows UI ověřilo položku Cutlass Red v seznamu, zadání její hodnoty a zobrazení typu po vytvoření. SHA-256 69630F5C632BACE4B1E1DC31F6DC4376CBEC2DB042296A1493D002A0A54D718D.
+
+0.1.0+20261122.141947 — 192 modelů rozděleno mezi 16 výrobců. Prošlo 55/55 testů. Windows UI: výběr Drake Interplanetary nabídl 20 modelů, vytvoření lodi typu Vulture prošlo. SHA-256 4057E9FD911FF1033C2DF4D06A186A62E3BC38AD4D04786148361E07E06CEC60.
+
+0.1.0+20261122.142522 — jeden výběr typu lodi se dvěma sloupci. 55/55 testů prošlo. Windows UI ověřilo otevření nabídky, výrobce Anvil a model Arrow, hledání Cutlass Red napříč výrobci, potvrzení a zobrazení typu po vytvoření.

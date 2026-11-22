@@ -22,6 +22,11 @@ public partial class MainWindow : Window
             try { await vm.DisposeAsync().AsTask().WaitAsync(TimeSpan.FromSeconds(3)); } catch { } await Dispatcher.InvokeAsync(Close);
         };
     }
+    void FleetSelection(object sender, RoutedPropertyChangedEventArgs<object> e) => vm.Inspect(e.NewValue);
+    void FleetRowClicked(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is TreeViewItem { IsSelected: true } item && vm.CreatingShip) vm.Inspect(item.DataContext);
+    }
     void Hold(Button button, VoiceChannel channel)
     {
         string source = "button:" + channel;

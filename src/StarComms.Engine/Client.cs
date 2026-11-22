@@ -77,12 +77,13 @@ public sealed class Client : IAsyncDisposable
         if (transport == null || transport.IsCancellationRequested) return;
         var token = transport.Token;
         VoiceReady = false; ResetAudio?.Invoke(); ready = NewSignal(); probeNonce = RandomNumberGenerator.GetBytes(16);
+        State("Ověřuji hlasové spojení v obou směrech…");
         try { foreach (int delay in new[] { 0, 250, 500, 1000, 2000, 1250 }) {
             if (delay > 0 && await Task.WhenAny(ready.Task, Task.Delay(delay, token)) == ready.Task) return;
             token.ThrowIfCancellationRequested();
             if (delay == 1250) break;
             byte[] probe = new byte[17]; probe[0] = 1; probeNonce.CopyTo(probe, 1); SendUdp(probe);
-        } State("Hlasové spojení se nepodařilo navázat. Zkusit hlas znovu."); } catch (OperationCanceledException) { }
+        } State("Jsi ve flotile, ale hlasové spojení se nepodařilo ověřit."); } catch (OperationCanceledException) { }
     }
     void RequestSnapshot()
     { if (Environment.TickCount64 - snapshotRequested < 5000) return; snapshotRequested = Environment.TickCount64; link?.Send("SnapshotRequest", new { }, Guid.NewGuid()); }

@@ -1,0 +1,35 @@
+<UserControl x:Class="StarComms.App.ShipModelPicker"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <StackPanel>
+    <TextBlock Text="Typ lodi (nepovinné)"/>
+    <ToggleButton x:Name="Trigger" AutomationProperties.Name="Typ lodi" MinHeight="32"
+                  HorizontalContentAlignment="Stretch" Background="#25292F" Foreground="#F4F5F6" Padding="8,3">
+      <DockPanel>
+        <TextBlock DockPanel.Dock="Right" Text="▾" Margin="6,0"/>
+        <TextBlock x:Name="Display" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+      </DockPanel>
+    </ToggleButton>
+    <Popup x:Name="Menu" PlacementTarget="{Binding ElementName=Trigger}" Placement="Bottom" StaysOpen="False"
+           IsOpen="{Binding IsChecked,ElementName=Trigger,Mode=TwoWay}" Opened="Opened">
+      <Border Width="490" Background="#22252A" BorderBrush="#54606B" BorderThickness="1" Padding="8" PreviewKeyDown="MenuKeyDown">
+        <StackPanel>
+          <TextBox x:Name="Search" AutomationProperties.Name="Hledat loď nebo výrobce" ToolTip="Hledat loď nebo výrobce"
+                   MinHeight="30" Padding="6,3" Margin="0,0,0,6" TextChanged="SearchChanged"/>
+          <Grid Height="245">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="2*"/><ColumnDefinition Width="3*"/></Grid.ColumnDefinitions>
+            <ListBox x:Name="Makers" AutomationProperties.Name="Výrobci" SelectionChanged="MakerChanged"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled" Padding="2"/>
+            <ListBox x:Name="Models" Grid.Column="1" AutomationProperties.Name="Modely lodí" Padding="2"
+                     BorderThickness="1,0,0,0" BorderBrush="#46505B" PreviewMouseLeftButtonUp="ModelClicked"/>
+            <TextBlock x:Name="NoResults" Grid.Column="1" Text="Žádný odpovídající model" Margin="10" IsHitTestVisible="False"/>
+          </Grid>
+          <WrapPanel>
+            <Button x:Name="Custom" Content="Použít vlastní typ" Click="UseCustom" MinHeight="26" Padding="8,2"/>
+            <Button x:Name="Clear" Content="Bez typu" Click="ClearType" MinHeight="26" Padding="8,2"/>
+          </WrapPanel>
+        </StackPanel>
+      </Border>
+    </Popup>
+  </StackPanel>
+</UserControl>
