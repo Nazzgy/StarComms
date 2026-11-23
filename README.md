@@ -2,7 +2,9 @@
 
 # StarComms
 
-StarComms je česko-anglická hlasová aplikace pro společné lety ve Star Citizenu na Windows x64. Každá loď má vlastní hovor pro posádku. Kapitáni mají navíc společný kanál, takže se mohou domluvit na dalším manévru, zatímco posádky dál mluví na svých lodích.
+**Se StarComms se celá flotila nemusí překřikovat v jednom hlasovém kanálu na Discordu.** Každá loď má vlastní kanál pro posádku a kapitáni mají navíc společný kanál pro koordinaci flotily.
+
+Třeba při salvage operaci se posádka Reclaimeru domlouvá, který vrak rozebere jako první. Ve stejnou chvíli se piloti stíhaček na kapitánském kanálu dohodnou, kdo bude Reclaimer krýt. Oba hovory můžou běžet současně.
 
 **[Stáhnout StarComms pro Windows](https://github.com/Nazzgy/StarComms/releases/latest)** · **[Český návod pro hráče a hostitele](docs/QUICKSTART_CS.md)**
 
