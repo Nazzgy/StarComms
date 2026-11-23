@@ -24,10 +24,10 @@ jobs:
           gh api "$endpoint" --jq .body > notes.md
           if ! grep -Fq 'Se StarComms se celá flotila' notes.md; then
             cat > intro.md <<'INTRO'
-            **Se StarComms se celá flotila nemusí překřikovat v jednom hlasovém kanálu na Discordu.** Každá loď má vlastní kanál pro posádku a kapitáni mají navíc společný kanál pro koordinaci flotily.
-            
-            Třeba při salvage operaci se posádka Reclaimeru domlouvá, který vrak rozebere jako první. Ve stejnou chvíli se piloti stíhaček na kapitánském kanálu dohodnou, kdo bude Reclaimer krýt. Oba hovory můžou běžet současně.
-            INTRO
+          **Se StarComms se celá flotila nemusí překřikovat v jednom hlasovém kanálu na Discordu.** Každá loď má vlastní kanál pro posádku a kapitáni mají navíc společný kanál pro koordinaci flotily.
+          
+          Třeba při salvage operaci se posádka Reclaimeru domlouvá, který vrak rozebere jako první. Ve stejnou chvíli se piloti stíhaček na kapitánském kanálu dohodnou, kdo bude Reclaimer krýt. Oba hovory můžou běžet současně.
+          INTRO
             { cat intro.md; echo; cat notes.md; } > updated.md
             gh api --method PATCH "$endpoint" -F body=@updated.md --silent
           fi
