@@ -2,7 +2,9 @@
 
 # StarComms
 
-StarComms is a Windows x64 voice app for Star Citizen fleets. Each ship has its own crew channel. Captains also share a command channel, so they can coordinate a maneuver while their crews keep talking aboard their own ships.
+**With StarComms, your fleet can fly together without everyone talking over each other in one Discord voice channel.** Each ship has its own crew channel, and captains share a separate channel to coordinate the fleet.
+
+On a salvage run, the Reclaimer crew can talk through which wreck to strip first. At the same time, the fighter pilots can use the captains’ channel to decide who will cover the Reclaimer.
 
 **[Download StarComms for Windows](https://github.com/Nazzgy/StarComms/releases/latest)** · **[Player and host guide](docs/QUICKSTART_EN.md)**
 
