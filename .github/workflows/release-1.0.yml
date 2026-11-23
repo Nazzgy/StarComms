@@ -1,4 +1,4 @@
-name: StarComms 1.0
+name: Publish StarComms 1.0
 on:
   workflow_dispatch:
   push:
@@ -8,25 +8,16 @@ permissions:
   contents: write
 concurrency: release-v1.0
 jobs:
-  release:
-    runs-on: windows-latest
+  publish:
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-      - uses: actions/setup-dotnet@v4
-        with:
-          global-json-file: global.json
-      - name: Build, test and publish Windows x64
-        shell: pwsh
-        run: ./scripts/publish.ps1
-      - name: Create release draft with portable EXE
-        shell: pwsh
+      - name: Publish the verified release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $hash = (Get-FileHash artifacts/StarComms.exe -Algorithm SHA256).Hash
-          $notes = ((Get-Content CHANGELOG.md -Raw -Encoding utf8) -split '(?m)^## ')[1].Trim()
-          $notes += "`n`nSHA-256 (StarComms.exe): $hash"
-          $notes | Set-Content release-notes.md -Encoding utf8
-          gh release create v1.0 artifacts/StarComms.exe --repo "$env:GITHUB_REPOSITORY" --draft --title "StarComms 1.0" --target "$env:GITHUB_SHA" --notes-file release-notes.md
+          endpoint="repos/$GITHUB_REPOSITORY/releases/455822554"
+          gh api "$endpoint" | jq -e '.tag_name == "v1.0" and .target_commitish == "ed793074f63ffd15d2d13deae6f57eff678cbf26" and (.assets | length == 1) and .assets[0].name == "StarComms.exe" and .assets[0].digest == "sha256:2d4c78fe69f0354c3cebaa63e4ffef925714cda343f7bb1faf768b92a2cfe489"'
+          if [ "$(gh api "$endpoint" --jq .draft)" = true ]; then
+            gh api --method PATCH "$endpoint" -F draft=false --silent
+          fi
+          gh api "$endpoint" | jq -e '.draft == false and .published_at != null'
