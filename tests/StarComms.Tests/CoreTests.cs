@@ -49,7 +49,7 @@ public class CoreTests
     [Fact] public async Task TCP001_OneByteReadsAndMultipleFrames() { using var stream=new MemoryStream();await Wire.Write(stream,Envelope.Make("Ping",new{nonce=1UL}),default);await Wire.Write(stream,Envelope.Make("Ping",new{nonce=2UL}),default); stream.Position=0;var fragmented=new FragmentStream(stream.ToArray());Assert.Equal(1UL,(await Wire.Read(fragmented,default)).Body.GetProperty("nonce").GetUInt64());Assert.Equal(2UL,(await Wire.Read(fragmented,default)).Body.GetProperty("nonce").GetUInt64()); }
     [Theory] [InlineData(0)] [InlineData(65537)] public async Task TCP001_InvalidLength(uint length) { byte[] prefix=new byte[4];BinaryPrimitives.WriteUInt32BigEndian(prefix,length);await Assert.ThrowsAsync<InvalidDataException>(()=>Wire.Read(new MemoryStream(prefix),default)); }
     [Fact] public void TLS001_ExactPin() { using var c=Certificates.Create(); Assert.True(Certificates.Valid(c,Certificates.Fingerprint(c)));Assert.False(Certificates.Valid(c,new string('0',64)));Assert.False(Certificates.Valid(c,null)); }
-    [Fact] public void VER001_CentralVersion() => Assert.StartsWith("0.1.0+",VersionInfo.Full);
+    [Fact] public void VER001_CentralVersion() => Assert.StartsWith("1.0.0+",VersionInfo.Full);
     sealed class Clock:TimeProvider { long value;public override long TimestampFrequency=>1000;public override long GetTimestamp()=>value;public void Advance(long ms)=>value+=ms; }
     sealed class FragmentStream(byte[] bytes):MemoryStream(bytes) { public override ValueTask<int> ReadAsync(Memory<byte> buffer,CancellationToken ct=default)=>base.ReadAsync(buffer[..Math.Min(1,buffer.Length)],ct); }
 }

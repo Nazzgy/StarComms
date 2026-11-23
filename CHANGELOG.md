@@ -1,5 +1,12 @@
 # Changelog
 
+## StarComms 1.0 (23. 11. 2026)
+
+- Samostatné EXE pro Windows x64 s českým a anglickým rozhraním.
+- Posádkové a kapitánské hovory mají samostatnou volbu hlasové aktivace nebo push-to-talk.
+- Hostitel může uložit veřejnou adresu pro pozvánky. Flotila už nemá pevný limit 12 hráčů.
+- Celý profil se ukládá vedle EXE do StarComms.cfg. Při aktualizaci se převezmou nastavení i identita hostitele.
+
 ## 0.1.0 · build 20261122.142522 (22. 11. 2026)
 
 - Lodě a jejich posádky jsou pohromadě v rozbalovacím seznamu. U hráčů vidíš kapitána a aktivní hlasový kanál.

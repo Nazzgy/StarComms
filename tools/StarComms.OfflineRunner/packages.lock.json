@@ -73,14 +73,14 @@
         "type": "Project",
         "dependencies": {
           "Concentus": "[2.2.2, )",
-          "StarComms.Core": "[0.1.0, )"
+          "StarComms.Core": "[1.0.0, )"
         }
       },
       "starcomms.tests": {
         "type": "Project",
         "dependencies": {
           "Microsoft.NET.Test.Sdk": "[17.14.1, )",
-          "StarComms.Engine": "[0.1.0, )",
+          "StarComms.Engine": "[1.0.0, )",
           "xunit": "[2.9.3, )"
         }
       },

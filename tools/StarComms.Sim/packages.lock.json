@@ -9,7 +9,7 @@
         "type": "Project",
         "dependencies": {
           "Concentus": "[2.2.2, )",
-          "StarComms.Core": "[0.1.0, )"
+          "StarComms.Core": "[1.0.0, )"
         }
       },
       "Concentus": {
