@@ -39,24 +39,20 @@ public sealed class HostTests
     }
 
     [Fact]
-    public async Task ConcurrentAdmissionsRespectTwelveMemberLimit()
+    public async Task ConcurrentAdmissionsBeyondTwentyFourPlayers()
     {
         using var cert = Certificates.Create();
         await using var host = new Host("Kapacita", cert);
         host.Start();
         await using var local = await host.ConnectLocal("Hostitel");
         host.Changed += () => { foreach (var pending in host.Pending) host.Decide(pending.Id, true); };
-        var clients = Enumerable.Range(0, 13).Select(_ => new Client()).ToArray();
+        var clients = Enumerable.Range(0, 25).Select(_ => new Client()).ToArray();
         var address = new JoinAddress(IPAddress.Loopback, host.Port, host.Fingerprint);
         try {
-            for (int i = 0; i < 11; i++) await clients[i].Connect(address, "Pilot " + i);
-            async Task Join(int i)
-            {
-                var exc = await Assert.ThrowsAsync<RuleException>(() => clients[i].Connect(address, "Pilot " + i));
-                Assert.Equal("FULL", exc.Message);
-            }
-            await Task.WhenAll(Join(11), Join(12));
-            Assert.Equal(12, host.Fleet.Snapshot.Members.Length);
+            for (int i = 0; i < 23; i++) await clients[i].Connect(address, "Pilot " + i);
+            await Task.WhenAll(clients[23].Connect(address, "Pilot 23"), clients[24].Connect(address, "Pilot 24"));
+            Assert.Equal(26, host.Fleet.Snapshot.Members.Length);
+            Assert.All(clients, c => Assert.True(c.VoiceReady));
         } finally { foreach (var client in clients) await client.DisposeAsync(); }
     }
 

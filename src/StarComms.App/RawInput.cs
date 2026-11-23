@@ -1,3 +1,4 @@
+using StarComms.Core;
 using System.Runtime.InteropServices;
 using System.Windows.Interop;
 
@@ -45,8 +46,8 @@ public sealed class RawInput : IDisposable
     }
     public static string Label(string? binding)
     {
-        if (binding == null) return "Nastavit tlačítko";
-        if (binding.StartsWith("M:")) return "Myš " + binding[2..];
+        if (binding == null) return UiText.AssignButton;
+        if (binding.StartsWith("M:")) return UiText.Mouse + binding[2..];
         var p = binding.Split(':'); if (p.Length != 3 || !int.TryParse(p[1], out int scan) || !int.TryParse(p[2], out int flags)) return binding;
         var text = new System.Text.StringBuilder(80); GetKeyNameText(scan << 16 | ((flags & 2) != 0 ? 1 << 24 : 0), text, 80); return text.Length > 0 ? text.ToString() : binding;
     }

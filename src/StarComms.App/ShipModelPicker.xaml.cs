@@ -1,3 +1,4 @@
+using StarComms.Core;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -23,7 +24,7 @@ public partial class ShipModelPicker : UserControl
 
     void UpdateLabel()
     {
-        if (Display != null) Display.Text = string.IsNullOrWhiteSpace(Text) ? "Vybrat typ lodi…" : Text;
+        if (Display != null) Display.Text = string.IsNullOrWhiteSpace(Text) ? UiText.SelectAShipModel : Text;
     }
 
     void Opened(object sender, EventArgs e)

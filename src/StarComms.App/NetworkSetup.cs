@@ -1,3 +1,4 @@
+using StarComms.Core;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -19,13 +20,13 @@ public static class NetworkSetup
         var candidates = Candidates(port);
         if (mapped == null) return candidates;
         var entry = new AddressCandidate(mapped.ToString(), InternetCandidate(mapped.Address)
-            ? "Adresa routeru · dostupnost neověřena" : "Adresa routeru je pouze místní");
+            ? UiText.RouterAddressReachabilityUnverified : UiText.RouterAddressIsLocalOnly);
         return candidates.Prepend(entry).DistinctBy(c => c.Address)
             .OrderByDescending(c => InternetCandidate(IPEndPoint.Parse(c.Address).Address)).ToArray();
     }
     public static AddressCandidate[] Candidates(int port)
     {
-        try { return NetworkInterface.GetAllNetworkInterfaces().Where(n => n.OperationalStatus == OperationalStatus.Up).SelectMany(n => n.GetIPProperties().UnicastAddresses).Select(a => a.Address).Where(a => !IPAddress.IsLoopback(a) && !a.IsIPv6LinkLocal && !a.IsIPv6Multicast && !a.Equals(IPAddress.Any) && !a.Equals(IPAddress.IPv6Any)).Select(a => new AddressCandidate(new IPEndPoint(a, port).ToString(), InternetCandidate(a) ? a.AddressFamily == AddressFamily.InterNetworkV6 ? "Neověřeno · spoluhráč musí mít funkční IPv6" : "Kandidát pro internet · neověřeno" : "Pouze místní síť (LAN)")).OrderBy(a => a.Description.StartsWith("Pouze")).ToArray(); }
+        try { return NetworkInterface.GetAllNetworkInterfaces().Where(n => n.OperationalStatus == OperationalStatus.Up).SelectMany(n => n.GetIPProperties().UnicastAddresses).Select(a => a.Address).Where(a => !IPAddress.IsLoopback(a) && !a.IsIPv6LinkLocal && !a.IsIPv6Multicast && !a.Equals(IPAddress.Any) && !a.Equals(IPAddress.IPv6Any)).Select(a => new AddressCandidate(new IPEndPoint(a, port).ToString(), InternetCandidate(a) ? a.AddressFamily == AddressFamily.InterNetworkV6 ? UiText.UnverifiedBothPlayersNeedWorkingIpv6 : UiText.InternetAddressUnverified : UiText.LocalNetworkOnlyLan)).OrderByDescending(a => InternetCandidate(IPEndPoint.Parse(a.Address).Address)).ToArray(); }
         catch { return []; }
     }
     public static void ConfigureFirewall(int port)

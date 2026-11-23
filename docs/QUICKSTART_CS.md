@@ -1,52 +1,61 @@
-# StarComms pro hráče
+**Čeština** · [English](QUICKSTART_EN.md)
 
-Po prvním úspěšném připojení najdeš na úvodní obrazovce tlačítko **Znovu připojit** s názvem flotily. Funguje i po restartu. Pokud hostitel změnil adresu nebo port, vlož novou pozvánku.
+# StarComms – český návod
 
-1. Rozbal **StarComms.exe** do vlastní složky na Windows x64.
-2. Spusť aplikaci. Potřebný runtime obsahuje EXE.
-3. Napiš přezdívku, podle které tě hostitel pozná.
-4. Vlož celou pozvánku od hostitele, klikni na **Připojit** a počkej na přijetí.
-5. Vyber loď a klikni na **Přestoupit sem**. Prohlížení seznamu lodí poslech nepřepíná.
-6. Posádka tě slyší, když promluvíš. Pro soukromý hovor si ve **Zvuk a nastavení** přiřaď tlačítko pro kapitány. Během držení tě slyší pouze kapitáni. Po uvolnění udělej krátkou pauzu, než začneš mluvit k posádce.
-7. Ve **Zvuk a nastavení → Způsob vysílání** nastav každý kanál zvlášť. Pro posádku i kapitány vyber **Hlasová aktivace** nebo **Držet tlačítko**. Při volbě tlačítka se pod kanálem zobrazí jeho přiřazení. Potvrď **Hotovo**. Při hlasové aktivaci obou kanálů vyber jako kapitán příjemce kliknutím na příslušný kanál v hlavním okně.
+## Připojuji se ke kamarádům
 
-## Když hostuješ
+1. Rozbal `StarComms.zip` do vlastní složky a spusť **StarComms.exe** na Windows x64. Při prvním spuštění vyber **Čeština**. Volba se uloží vedle EXE do `StarComms.cfg`.
+2. Zadej svou **přezdívku**. Do pole **Adresa nebo pozvánka od hostitele** vlož celou pozvánku, kterou ti hostitel poslal. Začíná `starcomms://join`.
+3. Klikni na **Připojit** a počkej, až tě hostitel přijme.
+4. Klikni pravým tlačítkem na název své lodi a zvol **Přestoupit sem**. Samotné označení lodi v seznamu slouží k prohlížení. Pokud je flotila zatím prázdná, můžeš první loď přidat sám.
+5. Promluv. Ve výchozím nastavení tě uslyší posádka tvé lodi.
 
-Zadej přezdívku a název flotily, pak vyber **Chci hostovat**. Nad seznamem lodí klikni na **Přidat loď**. Na hlavní obrazovce klikni na **Kopírovat pozvánku** a vlož ji kamarádovi do zprávy. Pokud je adresa jen pro LAN, uvidíš to po zkopírování. Jinou adresu můžeš vybrat přes **Podrobnosti připojení**. Na hlavní obrazovce přijmi žádosti. Ve **Správa flotily → Lodě a posádky** vyber vlevo loď. Vpravo vyber člena posádky a klikni na **Jmenovat kapitánem**. Hráče z jiné lodi nebo bez lodi nejdříve přiveď na palubu přes **Přesunout na tuto loď**. V záložce **Hráči** najdeš i hráče bez lodi. **Šablona lodí** uloží názvy a modely pro další let. Nech StarComms běžet až do konce letu.
+Po úspěšném připojení můžeš při příštím spuštění vybrat **Znovu připojit** s názvem flotily. Když hostitel změní adresu nebo port, vyžádej si novou pozvánku.
 
-Adresa označená **Pouze místní síť (LAN)** běžně poslouží hráčům na stejném routeru. Pro kamaráda v jiné domácnosti použij veřejnou adresu. Při ručním přesměrování nastav na routeru oba protokoly **TCP i UDP** na port zobrazený aplikací. Při připojení přes IPv6 potřebují IPv6 obě strany. Pokud poskytovatel používá CGNAT a funkční IPv6 chybí, může hostování převzít spoluhráč s dosažitelnou adresou.
+## Zakládám flotilu
+
+1. Zadej přezdívku a název flotily. Klikni na **Chci hostovat**.
+2. Vyber **Pozvat hráče**. StarComms zkusí připravit připojení přes router. Jakmile uvidíš pozvánku, klikni na **Kopírovat pozvánku** a vlož ji skupině do zprávy.
+3. U příchozí žádosti klikni na **Přijmout**. Během letu můžeš přepnout do hry. Ukončením hostování se flotila odpojí.
+
+### Jakou adresu mám poslat?
+
+- **Hrajete na stejné domácí síti.** Použij místní pozvánku. V **Podrobnosti připojení** jsou místní adresy označené **Pouze místní síť (LAN)**.
+- **Kamarád je v jiné domácnosti.** Použij pozvánku s veřejnou adresou. Pokud router hlásí například `192.168.11.10`, jde o soukromou adresu. Zobrazení adresy routeru samo o sobě nepotvrzuje dostupnost z internetu.
+- **Znáš svou veřejnou IP.** Otevři **Podrobnosti připojení → Veřejná IP pro pozvánky**. Zadej IP a případně vnější port ve tvaru `IP:port`. Klikni na **Zavřít**. Volba **Pozvat hráče** teď použije uloženou adresu. K automatickému výběru se vrátíš vymazáním pole a zavřením okna.
+
+Pokud se kamarád přes veřejnou IPv4 nedostane k žádosti o přijetí, zkontroluj na routeru přesměrování **TCP i UDP** z vnějšího portu v pozvánce na místní IP hostitelského počítače a port z **Podrobnosti připojení**. Ve stejném okně můžeš přes **Povolit hostování ve Windows** nastavit firewall. Ruční zadání IP v aplikaci mění jen pozvánku. Když poskytovatel sdílí veřejnou IPv4 mezi více zákazníky (CGNAT), můžete použít dosažitelnou IPv6, pokud ji mají obě strany, nebo může flotilu založit jiný hráč.
+
+## Lodě a kapitáni
+
+| Co chci udělat | Jak na to |
+| --- | --- |
+| Založit loď | Klikni na **Přidat loď**, zadej její název a potvrď **Vytvořit loď**. Loď může přidat kterýkoli hráč. Pokud jsi bez lodi, rovnou nastoupíš. |
+| Vybrat model | Otevři **Typ lodi**. Vlevo vyber výrobce a vpravo model, nebo napiš část názvu do hledání. Typ můžeš také vynechat nebo potvrdit přes **Použít vlastní typ**. |
+| Přestoupit | Klikni pravým tlačítkem na cílovou loď a vyber **Přestoupit sem**. |
+| Stát se kapitánem | Nastup na loď bez kapitána. Klikni pravým tlačítkem na její název a zvol **Stát se kapitánem**. |
+| Předat velení | Jako kapitán vyber člena vlastní posádky a klikni na **Předat velení vybranému členovi**. Hostitel může kapitána také jmenovat ve **Správě flotily**. |
+| Odebrat prázdnou loď | Klikni pravým tlačítkem na její název a vyber **Smazat prázdnou loď**. |
+
+## Mikrofon a mluvení během hry
+
+Ve **Zvuk a nastavení** vyber mikrofon a sluchátka. Promluv běžným hlasem a sleduj, jestli se objeví **Řeč zachycena**. Pokud začátky slov mizí, posuň práh hlasové aktivace doleva. Pokud ji spouští klávesnice, posuň ho doprava. Výstup ověříš tlačítkem **Vyzkoušet zvuk**.
+
+Ve **Způsob vysílání** se posádka a kapitáni nastavují zvlášť. Změny potvrď přes **Hotovo**.
+
+- **Hlasová aktivace** spustí přenos při řeči. Pokud ji jako kapitán zapneš pro oba kanály, vyber v hlavním okně, ke komu chceš mluvit.
+- **Držet tlačítko** vysílá po dobu držení přiřazené klávesy nebo tlačítka. Funguje i při přepnutí do hry.
+- **Výchozí kombinace pro kapitána** je hlasová aktivace pro posádku a tlačítko pro kapitány. Přiřaď si ho před letem. Podrž ho během rozkazu, pak ho uvolni a před další větou k posádce udělej krátkou pauzu.
 
 ## Když něco nefunguje
 
-- **Vidíš flotilu, hlas nefunguje.** Klikni na **Zkusit hlas znovu**. Pokud to nepomůže, ověř mikrofon a výstup v nastavení a požádej hostitele o kontrolu UDP.
-- **Jiné sestavení.** Obě čísla najdete v upozornění. V pravém dolním rohu má každý svou verzi a build. Hostitel může ostatním poslat stejnou kopii EXE.
-- **Potřebuješ diagnostiku.** V nastavení zapni **Logs on**, zopakuj problém a logování zase vypni. Soubory vznikají vedle skutečného EXE. Ve výchozím stavu je logování vypnuté.
+| Co se děje | Co zkusit |
+| --- | --- |
+| Hostitel nevidí moji žádost | Požádej ho o čerstvou pozvánku. Pokud jste ve dvou domácnostech, ověřte veřejnou adresu a port podle části o hostování. |
+| Vidím flotilu, ale neslyšíme se | Ověřte, že jste nastoupili na stejnou loď, a zkontrolujte mikrofon a výstup. Pokud aplikace hlásí problém s hlasovým spojením, klikni na **Zkusit hlas znovu**. Hostitel zkontroluje průchod UDP. |
+| Aplikace hlásí jiné sestavení | Porovnejte **verzi i build** vpravo dole. Pro společný let použijte stejné vydání. |
+| Windows odepřel přístup ke složce profilu | Přesuň EXE se svým CFG do složky, kam můžeš zapisovat. |
 
+Pokud problém trvá, poznamenej si číslo sestavení, přesné znění chyby a zda nastala u hostitele nebo u hráče. V nastavení můžeš zapnout **Logs on**, problém zopakovat a logování opět vypnout. Diagnostické soubory najdeš přímo vedle spuštěného `StarComms.exe`.
 
-Pokud Windows odepře zápis do výchozí složky profilu, aplikace při spuštění nabídne výběr složky. Při dalším spuštění vyber stejnou složku pro zachování identity hostitele. Pro spuštění přímo s tímto profilem použij parametr --profile následovaný úplnou cestou ke složce v uvozovkách.
-
-## Citlivost mikrofonu a mluvčí
-
-Ve **Zvuk a nastavení** promluv běžným hlasem a sleduj místní test mikrofonu. Bílá čára ukazuje práh spuštění. Pokud tichá slova mizí, posuň práh doleva. Pokud vysílání spouští psaní na klávesnici, posuň ho doprava. Při řeči má ukazatel hlásit **Řeč zachycena**, při běžném hluku **Ticho**. Během nastavování zůstává vysílání pozastavené. Volbu ulož přes **Hotovo**.
-
-U mluvčího se objeví mikrofon a označení **posádka** nebo **kapitáni**. Člen posádky vidí aktivitu kanálů, které může slyšet.
-
-## Zkouška při letu ze dvou domácností
-
-Tři hráči použijí stejný build. Na první lodi je kapitán A a člen posádky, na druhé kapitán B. A používá hlasovou aktivaci pro posádku a tlačítko pro kapitány. Ve hře při minimalizovaném StarComms:
-
-1. A řekne „posádka jedna“. Slyší ho jen posádka první lodi.
-2. A podrží kapitánské tlačítko, řekne „velení dva“, uvolní ho a hned dořekne „konec“. Jen kapitán B slyší část během držení. Posádka neslyší soukromou větu ani její dozvuk po uvolnění.
-3. A udělá krátkou pauzu a řekne „posádka tři“. Opět ho slyší posádka první lodi.
-
-Hostitel může v hlavním okně vybrat loď a kliknout na jméno člena posádky. Tlačítkem **Jmenovat kapitánem** mu svěří velení. Pro přesun vybere cílovou loď a klikne na **Přesunout na loď**.
-
-Každý připojený hráč může kliknout na **Přidat loď**, zadat název a potvrdit **Vytvořit loď**. Pokud jsi bez lodi, rovnou nastoupíš. Pokud už jsi na palubě, zůstaneš u své posádky. Kapitána můžeš určit kliknutím na jméno člena posádky.
-
-Pravým tlačítkem na název lodi otevřeš nabídku **Přestoupit sem** a **Smazat prázdnou loď**. Prázdnou loď může odebrat každý připojený hráč.
-
-Chceš velet? Nastup na loď bez kapitána, vyber její název a klikni na **Stát se kapitánem**. Stejná volba je pod pravým tlačítkem na názvu lodi. Když už loď kapitána má, může ti předat velení.
-
-Při vytváření zadej vlastní název a v poli **Typ lodi** vyber model. Psaním začátku názvu ho rychle najdeš. Typ lze vyplnit i ručně nebo vynechat. Výběr funguje offline.
-
-Otevři **Typ lodi**. V jedné nabídce vyber vlevo výrobce a vpravo model. Do horního pole můžeš rovnou napsat část názvu napříč výrobci; vlastní hodnotu potvrď přes **Použít vlastní typ**.
+Soubor `StarComms.cfg` vedle EXE obsahuje celý tvůj profil včetně důvěryhodných hostitelů, šablony lodí a identity hostitele chráněné účtem Windows. Kamarádům pošli pouze EXE nebo distribuční ZIP. Při první aktualizaci se převezme dosavadní profil. Pro vlastní původní složku použij při prvním spuštění `StarComms.exe --profile "c:\cesta\k\profilu"`.

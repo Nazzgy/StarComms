@@ -68,7 +68,7 @@ public static class Wire
     }
 }
 public sealed record Hello(int ProtocolVersion, string AppVersion, string Nickname, Guid? ResumeSessionId = null, string? ResumeToken = null);
-public sealed record ServerHello(int ProtocolVersion, string AppVersion, Guid SessionId, string FleetName, int Capacity = 12);
+public sealed record ServerHello(int ProtocolVersion, string AppVersion, Guid SessionId, string FleetName, int Capacity = 0);
 public sealed record Accepted(uint MemberId, ulong ConnectionId, string ResumeToken, byte[] UdpKeyC2H, byte[] UdpKeyH2C, byte[] NoncePrefixC2H, byte[] NoncePrefixH2C, FleetSnapshot Snapshot);
 public sealed record DeleteEmptyShip(uint ShipId);
 public sealed record CreateShip(string Name, uint ExpectedMembershipEpoch, string Model = "");

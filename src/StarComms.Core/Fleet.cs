@@ -41,7 +41,6 @@ public sealed class Fleet
     {
         lock (Sync) {
             name = Text(name, 2, 24);
-            if (members.Count >= 12) throw new RuleException("FULL");
             if (members.Values.Any(m => string.Equals(m.Nickname, name, StringComparison.OrdinalIgnoreCase))) throw new RuleException("NAME_IN_USE");
             var m = new Member(checked(++nextMember), name, IsHost: host); members.Add(m.MemberId, m); version++; return m;
         }

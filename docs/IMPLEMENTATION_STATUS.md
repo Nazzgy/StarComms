@@ -138,3 +138,12 @@ Build 20261122.135924 – kontextová nabídka lodi. 54/54 automatických testů
 0.1.0+20261122.141947 — 192 modelů rozděleno mezi 16 výrobců. Prošlo 55/55 testů. Windows UI: výběr Drake Interplanetary nabídl 20 modelů, vytvoření lodi typu Vulture prošlo. SHA-256 4057E9FD911FF1033C2DF4D06A186A62E3BC38AD4D04786148361E07E06CEC60.
 
 0.1.0+20261122.142522 — jeden výběr typu lodi se dvěma sloupci. 55/55 testů prošlo. Windows UI ověřilo otevření nabídky, výrobce Anvil a model Arrow, hledání Cutlass Red napříč výrobci, potvrzení a zobrazení typu po vytvoření.
+0.1.0+20261123.163334 – zjednodušené pozvání hráče. 55/55 automatických testů. Ve Windows ověřeno založení flotily z publikovaného EXE a zobrazení odkazu starcomms:// po kliknutí na Pozvat hráče. Spojení mezi dvěma domácnostmi v tomto sestavení neověřeno.
+
+0.1.0+20261123.165529 – 55/55 testů. Windows UI: uložení vlastní veřejné IP s portem při zavření, kontrola po otevření, kontrola odkazu v Pozvat hráče, zápis do profilu a návrat na automatiku. Dvě domácí sítě neověřeny. SHA-256 EXE: 02D7870E8BF287F54BB6184BC681C9F92B50952690AA93D8F21876C3ABE5AE47.
+
+0.1.0+20261123.170243 – AUTH-003: 26 současně připojených členů na loopbacku, včetně hostitele. Poslední dva klienti připojeni souběžně, ověřena připravenost hlasu. 55/55 testů. Společný let 26 lidí přes internet neověřen. SHA-256 EXE: C3339E06E1FCD1C78CD2AAE5ECF79557DC5A5D4AB2D35025D33DD36740A3DDC6.
+
+0.1.0+20261123.172936 – 55/55 testů. Windows UI ověřilo výběr English při prvním spuštění, uložení language=en vedle EXE, anglické rozhraní po restartu, hostování a správu flotily, ruční přepnutí na češtinu, české nastavení zvuku a ukončení. ZIP obsahuje pouze ověřené EXE. SHA-256: 4370EDACE5EC00BBB561850871A4868F7AE619ED123B067E1C7FF59DB3F71113.
+
+0.1.0+20261123.174524 – 55/55 automatických testů. UI ve Windows: přechod z předchozího distribučního EXE, import přezdívky a shodného chráněného certifikátu, založení flotily, přijetí druhého klienta, přenos zvuku a připojení po restartu. ZIP ověřen, jedno EXE. SHA-256: 1F12ED7580B1333E9535CD32539A450D77E370C51698105CBB42C49277F1B67C.

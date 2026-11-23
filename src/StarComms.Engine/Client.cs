@@ -46,7 +46,7 @@ public sealed class Client : IAsyncDisposable
     {
         transport = CancellationTokenSource.CreateLinkedTokenSource(life.Token); var target = address!;
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(ct, transport.Token); timeout.CancelAfter(TimeSpan.FromSeconds(10));
-        tcp = new(target.Address.AddressFamily) { NoDelay = true }; State("Připojuji se…");
+        tcp = new(target.Address.AddressFamily) { NoDelay = true }; State(UiText.Connecting);
         await tcp.ConnectAsync(target.Address, target.Port, timeout.Token);
         string? seen = null;
         var tls = new SslStream(tcp.GetStream(), false, (_, cert, _, _) => { if (cert == null) return false; using var c = new X509Certificate2(cert); seen = Certificates.Fingerprint(c); return Certificates.Valid(c, target.Fingerprint); });
@@ -55,14 +55,14 @@ public sealed class Client : IAsyncDisposable
         link = new(tls); link.Send("ClientHello", new Hello(1, VersionInfo.Full, nickname, session, resumeToken), Guid.NewGuid()); timeout.CancelAfter(TimeSpan.FromSeconds(5));
         while (true) {
             var e = await link.Read(timeout.Token);
-            if (e.Type == "ServerHello") { var h = e.Read<ServerHello>(); if (h.ProtocolVersion != 1) throw new RuleException("VERSION_MISMATCH"); VersionWarning = h.AppVersion != VersionInfo.Full ? $"Máš jiné sestavení než hostitel: {VersionInfo.Full} / {h.AppVersion}" : null; }
-            else if (e.Type == "AdmissionPending") { State("Čekám, až tě hostitel přijme…"); timeout.CancelAfter(TimeSpan.FromSeconds(60)); }
+            if (e.Type == "ServerHello") { var h = e.Read<ServerHello>(); if (h.ProtocolVersion != 1) throw new RuleException("VERSION_MISMATCH"); VersionWarning = h.AppVersion != VersionInfo.Full ? string.Format(UiText.YourBuildDiffersFromTheHost, VersionInfo.Full, h.AppVersion) : null; }
+            else if (e.Type == "AdmissionPending") { State(UiText.WaitingForTheHostToAcceptYou); timeout.CancelAfter(TimeSpan.FromSeconds(60)); }
             else if (e.Type == "Rejected") throw new RuleException(e.Body.GetProperty("code").GetString() ?? "DENIED");
             else if (e.Type == "Accepted") {
                 accepted = e.Read<Accepted>(); resumeToken = accepted.ResumeToken; session = accepted.Snapshot.SessionId; Snapshot = accepted.Snapshot;
                 outgoing = new(accepted.UdpKeyC2H, accepted.NoncePrefixC2H, accepted.ConnectionId); incoming = new(accepted.UdpKeyH2C, accepted.NoncePrefixH2C, accepted.ConnectionId);
                 udp = new(target.Address.AddressFamily, SocketType.Dgram, ProtocolType.Udp); udp.Bind(new IPEndPoint(target.Address.AddressFamily == AddressFamily.InterNetwork ? IPAddress.Any : IPAddress.IPv6Any, 0)); udp.Connect(new IPEndPoint(target.Address, target.Port)); udp.Blocking = false;
-                pong = keepAck = Environment.TickCount64; ready = NewSignal(); bursts.Clear(); State("Připojeno · připravuji hlas"); break;
+                pong = keepAck = Environment.TickCount64; ready = NewSignal(); bursts.Clear(); State(UiText.ConnectedPreparingVoice); break;
             }
         }
     }
@@ -77,13 +77,13 @@ public sealed class Client : IAsyncDisposable
         if (transport == null || transport.IsCancellationRequested) return;
         var token = transport.Token;
         VoiceReady = false; ResetAudio?.Invoke(); ready = NewSignal(); probeNonce = RandomNumberGenerator.GetBytes(16);
-        State("Ověřuji hlasové spojení v obou směrech…");
+        State(UiText.CheckingVoiceInBothDirections);
         try { foreach (int delay in new[] { 0, 250, 500, 1000, 2000, 1250 }) {
             if (delay > 0 && await Task.WhenAny(ready.Task, Task.Delay(delay, token)) == ready.Task) return;
             token.ThrowIfCancellationRequested();
             if (delay == 1250) break;
             byte[] probe = new byte[17]; probe[0] = 1; probeNonce.CopyTo(probe, 1); SendUdp(probe);
-        } State("Jsi ve flotile, ale hlasové spojení se nepodařilo ověřit."); } catch (OperationCanceledException) { }
+        } State(UiText.YouJoinedTheFleetButVoiceCouldNot); } catch (OperationCanceledException) { }
     }
     void RequestSnapshot()
     { if (Environment.TickCount64 - snapshotRequested < 5000) return; snapshotRequested = Environment.TickCount64; link?.Send("SnapshotRequest", new { }, Guid.NewGuid()); }
@@ -99,13 +99,13 @@ public sealed class Client : IAsyncDisposable
                     bool changed = false;
                     lock (sync) { if (Snapshot == null || s.StateVersion >= Snapshot.StateVersion) { changed = s.StateVersion != Snapshot?.StateVersion; Snapshot = s; snapshotRequested = 0; } }
                     if (changed) ResetAudio?.Invoke(); Changed?.Invoke(); break;
-                case "VoiceReady": if (e.Body.GetProperty("connectionId").GetUInt64() == accepted!.ConnectionId) { VoiceReady = true; keepAck = Environment.TickCount64; ready.TrySetResult(); State("Připojeno · hlas připraven"); } break;
+                case "VoiceReady": if (e.Body.GetProperty("connectionId").GetUInt64() == accepted!.ConnectionId) { VoiceReady = true; keepAck = Environment.TickCount64; ready.TrySetResult(); State(UiText.ConnectedVoiceReady); } break;
                 case "Ping": link.Send("Pong", new { nonce = e.Body.GetProperty("nonce").GetUInt64() }); break;
                 case "Pong": if (e.Body.GetProperty("nonce").GetUInt64() == ping) pong = Environment.TickCount64; break;
                 case "Result": lock (sync) if (e.ReplyTo is Guid id && requests.TryGetValue(id, out var completion)) completion.TrySetResult(e.Read<Result>()); break;
                 case "VoiceEnd": var end = e.Read<VoiceEnd>(); lock (sync) { if (Valid(end.SenderId, end.SenderEpoch, end.RecipientEpoch, end.Channel, end.ShipId) && Guard(end.SenderId).Accept(end.SenderEpoch, end.TalkBurstId, end.Channel, end.ShipId, end.LastFrameIndex, true)) End?.Invoke(end); } break;
-                case "Removed": intentional = true; resumeToken = null; State("Hostitel tě vyřadil z flotily."); return;
-                case "SessionEnded": intentional = true; resumeToken = null; State("Hostitel ukončil flotilu."); return;
+                case "Removed": intentional = true; resumeToken = null; State(UiText.TheHostRemovedYouFromTheFleet); return;
+                case "SessionEnded": intentional = true; resumeToken = null; State(UiText.TheHostEndedTheFleet); return;
             }
         } } catch (Exception e) when (e is IOException or SocketException or OperationCanceledException or ObjectDisposedException or InvalidDataException or System.Text.Json.JsonException) { lost = true; }
         finally { VoiceReady = false; ResetAudio?.Invoke(); transport?.Cancel(); udp?.Dispose(); tcp?.Dispose(); Changed?.Invoke(); }
@@ -174,7 +174,7 @@ public sealed class Client : IAsyncDisposable
     }
     async Task ReconnectWithinBudget()
     {
-        State("Spojení se přerušilo. Obnovuji připojení…"); await CloseTransport();
+        State(UiText.ConnectionInterruptedReconnecting); await CloseTransport();
         using var budget = CancellationTokenSource.CreateLinkedTokenSource(life.Token); budget.CancelAfter(TimeSpan.FromSeconds(15)); long start = Environment.TickCount64;
         foreach (int at in new[] { 0, 1000, 3000, 6000, 10000 }) {
             try {
@@ -183,13 +183,13 @@ public sealed class Client : IAsyncDisposable
             } catch (RuleException e) when (e.Message == "RESUME_INVALID") {
                 await CloseTransport();
                 resumeToken = null; intentional = true;
-                State("Hostitel zahájil novou flotilu nebo vypršel čas na obnovení. Připoj se znovu.");
+                State(UiText.TheHostStartedANewFleetOrTheLabel);
                 return;
             } catch (Exception e) when (e is IOException or SocketException or AuthenticationException or OperationCanceledException or RuleException or IdentityException or TimeoutException) {
                 await CloseTransport(); if (budget.IsCancellationRequested) break;
             }
         }
-        State("Spojení se nepodařilo obnovit. Zkusit znovu / Zadat jinou adresu.");
+        State(UiText.CouldNotReconnectTryAgainOrEnterAnother);
     }
     public async Task Retry() { if (controlTask is { IsCompleted: false }) return; await Reconnect(); }
     public async ValueTask DisposeAsync()

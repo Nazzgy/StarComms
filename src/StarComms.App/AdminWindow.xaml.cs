@@ -49,10 +49,10 @@ public partial class AdminWindow : Window
     PlayerRow Row(Member member, bool showShip)
     {
         var label = member.Nickname;
-        if (member.IsCaptain) label += " · kapitán";
-        if (member.IsHost) label += " · hostitel";
-        if (showShip) label += " · " + (snapshot.Ships.FirstOrDefault(s => s.ShipId == member.ShipId)?.Name ?? "bez lodi");
-        if (member.Status == MemberStatus.Reconnecting) label += " · obnovuje spojení";
+        if (member.IsCaptain) label += UiText.CaptainLabel;
+        if (member.IsHost) label += UiText.Host;
+        if (showShip) label += " · " + (snapshot.Ships.FirstOrDefault(s => s.ShipId == member.ShipId)?.Name ?? UiText.NoShip);
+        if (member.Status == MemberStatus.Reconnecting) label += UiText.ReconnectingLabel;
         return new(member.MemberId, label, member);
     }
 
@@ -65,10 +65,10 @@ public partial class AdminWindow : Window
     {
         var ship = Ships.SelectedItem as Ship;
         Details.Visibility = ship == null ? Visibility.Collapsed : Visibility.Visible;
-        ShipTitle.Text = ship?.Name ?? "Flotila zatím nemá loď";
-        if (ship == null) { ShipInfo.Text = "Začni tlačítkem Přidat loď."; return; }
+        ShipTitle.Text = ship?.Name ?? UiText.TheFleetHasNoShipsYet;
+        if (ship == null) { ShipInfo.Text = UiText.SelectAddShipToGetStarted; return; }
         var captain = snapshot.Members.FirstOrDefault(m => m.MemberId == ship.CaptainMemberId);
-        ShipInfo.Text = string.Join(" · ", new[] {ship.Model, captain == null ? "Bez kapitána" : "Kapitán: " + captain.Nickname}.Where(x => x.Length > 0));
+        ShipInfo.Text = string.Join(" · ", new[] {ship.Model, captain == null ? UiText.NoCaptain : UiText.CaptainLabelLabel + captain.Nickname}.Where(x => x.Length > 0));
         var selectedCrew = Crew.SelectedValue;
         var selectedBoarding = Boarding.SelectedValue;
         Crew.ItemsSource = snapshot.Members.Where(m => m.ShipId == ship.ShipId).Select(m => Row(m, false)).ToArray();
@@ -97,7 +97,7 @@ public partial class AdminWindow : Window
     void Run(Action action, string success)
     {
         try { action(); Feedback.Text = success; }
-        catch (Exception e) { Feedback.Text = e is RuleException { Message: "FULL" } ? "Ve flotile může být nejvýše 12 lodí." : Errors.Text(e); }
+        catch (Exception e) { Feedback.Text = e is RuleException { Message: "FULL" } ? UiText.AFleetCanHaveUpTo12Ships : Errors.Text(e); }
     }
 
     void Mutate(Action<Fleet> change)
@@ -109,20 +109,20 @@ public partial class AdminWindow : Window
     void Appoint(object sender, RoutedEventArgs e)
     {
         if (Ships.SelectedItem is Ship ship && Crew.SelectedItem is PlayerRow row)
-            Run(() => Mutate(f => f.Captain(ship.ShipId, row.Id)), $"Lodi {ship.Name} velí {row.Member.Nickname}.");
+            Run(() => Mutate(f => f.Captain(ship.ShipId, row.Id)), string.Format(UiText.NowCommands, ship.Name, row.Member.Nickname));
     }
 
     void Move(object sender, RoutedEventArgs e)
     {
         if (Ships.SelectedItem is Ship ship && Boarding.SelectedItem is PlayerRow row)
-            Run(() => Mutate(f => f.Move(row.Id, ship.ShipId, row.Member.MembershipEpoch)), $"{row.Member.Nickname} je na palubě lodi {ship.Name}.");
+            Run(() => Mutate(f => f.Move(row.Id, ship.ShipId, row.Member.MembershipEpoch)), string.Format(UiText.IsAboard, row.Member.Nickname, ship.Name));
     }
 
     void Kick(object sender, RoutedEventArgs e)
     {
         if (Players.SelectedItem is PlayerRow row && !row.Member.IsHost &&
-            ConfirmationWindow.Ask("Vyřadit hráče?", $"Hráč {row.Member.Nickname} bude odpojen z flotily.", "Vyřadit", this))
-            Run(() => host.Remove(row.Id), $"Hráč {row.Member.Nickname} byl vyřazen.");
+            ConfirmationWindow.Ask(UiText.RemovePlayer, string.Format(UiText.WillBeDisconnectedFromTheFleet, row.Member.Nickname), UiText.Remove, this))
+            Run(() => host.Remove(row.Id), string.Format(UiText.WasRemoved, row.Member.Nickname));
     }
 
     void Create(object sender, RoutedEventArgs e) => EditShip(null);
@@ -139,26 +139,26 @@ public partial class AdminWindow : Window
             });
             Refresh(id);
         });
-        if (editor.ShowDialog() == true) Feedback.Text = ship == null ? "Loď byla přidána." : "Změny lodi byly uloženy.";
+        if (editor.ShowDialog() == true) Feedback.Text = ship == null ? UiText.ShipAdded : UiText.ShipChangesSaved;
     }
 
     void Delete(object sender, RoutedEventArgs e)
     {
-        if (Ships.SelectedItem is Ship ship && ConfirmationWindow.Ask("Zrušit loď?", $"Loď {ship.Name} bude zrušena. Její posádka si bude moci vybrat jinou loď.", "Zrušit loď", this))
-            Run(() => Mutate(f => f.DeleteShip(ship.ShipId)), $"Loď {ship.Name} byla zrušena.");
+        if (Ships.SelectedItem is Ship ship && ConfirmationWindow.Ask(UiText.RemoveShipLabel, string.Format(UiText.WillBeRemovedItsCrewCanBoardAnother, ship.Name), UiText.RemoveShip, this))
+            Run(() => Mutate(f => f.DeleteShip(ship.ShipId)), string.Format(UiText.WasRemovedLabel, ship.Name));
     }
 
     void SaveTemplate(object sender, RoutedEventArgs e) => Run(() =>
-        LocalData.Save("fleet-template.json", new FleetTemplate(snapshot.FleetName, snapshot.Ships.Select(s => new ShipTemplate(s.Name, s.Model)).ToArray())), "Šablona lodí byla uložena.");
+        LocalData.Save("fleet-template", new FleetTemplate(snapshot.FleetName, snapshot.Ships.Select(s => new ShipTemplate(s.Name, s.Model)).ToArray())), UiText.ShipTemplateSaved);
 
     void LoadTemplate(object sender, RoutedEventArgs e)
     {
-        var template = LocalData.Read("fleet-template.json", () => new FleetTemplate("", []));
-        if (template.Ships is not { Length: > 0 }) { Feedback.Text = "V šabloně nejsou žádné lodě."; return; }
+        var template = LocalData.Read("fleet-template", () => new FleetTemplate("", []));
+        if (template.Ships is not { Length: > 0 }) { Feedback.Text = UiText.TheTemplateContainsNoShips; return; }
         Run(() => Mutate(f => {
             if (f.Snapshot.Ships.Length + template.Ships.Length > 12) throw new RuleException("FULL");
             foreach (var s in template.Ships) { Fleet.Text(s.Name, 1, 32); Fleet.Text(s.Model, 0, 48); }
             foreach (var s in template.Ships) f.CreateShip(s.Name, s.Model);
-        }), $"Počet přidaných lodí: {template.Ships.Length}.");
+        }), string.Format(UiText.ShipsAdded, template.Ships.Length));
     }
 }

@@ -51,8 +51,8 @@ public sealed class AudioService : IAsyncDisposable
     }
     public AudioDevice[] Devices(DataFlow flow)
     {
-        try { return new[] { new AudioDevice("", "Systémové zařízení") }.Concat(enumerator.EnumerateAudioEndPoints(flow, DeviceState.Active).Select(d => new AudioDevice(d.ID, d.FriendlyName))).ToArray(); }
-        catch { return [new("", "Systémové zařízení")]; }
+        try { return new[] { new AudioDevice("", UiText.SystemDefault) }.Concat(enumerator.EnumerateAudioEndPoints(flow, DeviceState.Active).Select(d => new AudioDevice(d.ID, d.FriendlyName))).ToArray(); }
+        catch { return [new("", UiText.SystemDefault)]; }
     }
     MMDevice Device(DataFlow flow, string id)
     {
@@ -84,14 +84,14 @@ public sealed class AudioService : IAsyncDisposable
         await Task.Run(() => {
             try {
                 player = new WasapiPlayerBuilder().WithDevice(Device(DataFlow.Render, output)).WithLatency(40).Build();
-                player.Init(new MixerProvider(mixer).ToWaveProvider()); player.PlaybackStopped += (_, e) => { if (e.Exception != null) { OutputAvailable = false; Disarm(); Error?.Invoke("Sluchátka nejsou dostupná. Vyber jiný výstup."); } }; player.Play(); OutputAvailable = true;
-            } catch { Error?.Invoke("Sluchátka nejsou dostupná. Vyber jiný výstup."); }
+                player.Init(new MixerProvider(mixer).ToWaveProvider()); player.PlaybackStopped += (_, e) => { if (e.Exception != null) { OutputAvailable = false; Disarm(); Error?.Invoke(UiText.HeadphonesUnavailableSelectAnotherOutput); } }; player.Play(); OutputAvailable = true;
+            } catch { Error?.Invoke(UiText.HeadphonesUnavailableSelectAnotherOutput); }
             try {
                 recorder = new WasapiRecorderBuilder().WithDevice(Device(DataFlow.Capture, input)).WithFormat(new WaveFormat(48000, 16, 1)).WithBufferLength(40).Build();
                 recorder.DataAvailable += (data, flags, devicePosition, qpcPosition) => Capture(data);
-                recorder.RecordingStopped += (_, e) => { if (e.Exception != null) { InputAvailable = false; Disarm(); Error?.Invoke("Mikrofon není dostupný. Ostatní stále slyšíš. Vyber mikrofon."); } };
+                recorder.RecordingStopped += (_, e) => { if (e.Exception != null) { InputAvailable = false; Disarm(); Error?.Invoke(UiText.MicrophoneUnavailableYouCanStillHearOthersSelect); } };
                 recorder.StartRecording(); InputAvailable = true;
-            } catch { Error?.Invoke("Mikrofon není dostupný. Ostatní stále slyšíš. Vyber mikrofon."); }
+            } catch { Error?.Invoke(UiText.MicrophoneUnavailableYouCanStillHearOthersSelect); }
         });
     }
     public void Attach(Client? value)
@@ -169,7 +169,7 @@ public sealed class AudioService : IAsyncDisposable
                 }
             } catch {
                 Disarm();
-                Error?.Invoke("Zvuk se nepodařilo zpracovat. Zkus znovu vybrat mikrofon.");
+                Error?.Invoke(UiText.AudioProcessingFailedTrySelectingYourMicrophoneAgain);
             }
         } } catch (OperationCanceledException) { }
     }

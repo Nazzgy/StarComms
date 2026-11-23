@@ -13,7 +13,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent(); DataContext = vm; Width = Math.Clamp(vm.Settings.Width, 900, 2400); Height = Math.Clamp(vm.Settings.Height, 650, 1600);
-        SourceInitialized += (_, _) => { try { input = new(new WindowInteropHelper(this).Handle); input.Input += vm.Raw; input.Interrupted += vm.Audio.Disarm; input.LockChanged += locked => { vm.Audio.SessionLocked = locked; vm.Audio.Disarm(); }; } catch { vm.Message = "Globální tlačítka nejsou dostupná. Použij tlačítko v okně."; } };
+        SourceInitialized += (_, _) => { try { input = new(new WindowInteropHelper(this).Handle); input.Input += vm.Raw; input.Interrupted += vm.Audio.Disarm; input.LockChanged += locked => { vm.Audio.SessionLocked = locked; vm.Audio.Disarm(); }; } catch { vm.Message = UiText.GlobalButtonsAreUnavailableUseTheButtonIn; } };
         Loaded += async (_, _) => await vm.Initialize(); timer.Tick += (_, _) => vm.Tick(); timer.Start();
         Hold(ShipTalk, VoiceChannel.Ship); Hold(CommandTalk, VoiceChannel.Command);
         PreviewGotKeyboardFocus += (_, e) => { if (e.NewFocus is TextBox) { vm.Audio.Editing = true; vm.Audio.Disarm(); } else vm.Audio.Editing = false; };

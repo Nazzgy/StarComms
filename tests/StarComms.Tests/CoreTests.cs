@@ -16,7 +16,7 @@ public class CoreTests
     [InlineData("127.1")] [InlineData("0x7f000001")] [InlineData("0177.0.0.1")]
     public void CON002_Invalid(string input) => Assert.Throws<RuleException>(() => JoinAddress.Parse(input));
     [Fact] public void CON002_Invitation() { var original = new JoinAddress(IPAddress.IPv6Loopback, 49555, new string('a',64)); Assert.Equal(original, JoinAddress.Parse(original.Invitation(original.Fingerprint!))); }
-    [Fact] public void AUTH003_CapacityAndUnicode() { var f = new Fleet("Žluťoučká flotila"); f.Add("Jose\u0301"); Assert.Throws<RuleException>(() => f.Add("JOSÉ")); for(int i=1;i<12;i++) f.Add("Hráč"+i); Assert.Throws<RuleException>(()=>f.Add("Třináctý")); }
+    [Fact] public void AUTH003_CapacityAndUnicode() { var f = new Fleet("Žluťoučká flotila"); f.Add("Jose\u0301"); Assert.Throws<RuleException>(() => f.Add("JOSÉ")); for(int i=1;i<12;i++) f.Add("Hráč"+i); f.Add("Třináctý"); Assert.Equal(13, f.Snapshot.Members.Length); }
     [Fact] public void ROUTE_RoleRevocation()
     {
         var f = new Fleet("Test"); var a=f.Add("Host",true); var b=f.Add("Crew"); var c=f.Add("Captain"); var s=f.CreateShip("A"); var t=f.CreateShip("B"); f.Move(a.MemberId,s.ShipId); f.Move(b.MemberId,s.ShipId); f.Move(c.MemberId,t.ShipId); f.Captain(s.ShipId,b.MemberId); f.Captain(t.ShipId,c.MemberId);

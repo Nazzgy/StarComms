@@ -12,7 +12,7 @@ Dokončení znamená skutečné snímání a přehrávání zvuku, přenos přes
 
 ### 1.1 Pevná produktová rozhodnutí
 
-- Nejvýše 12 přijatých hráčů včetně hostitele. Nejvýše 12 lodí, jeden kapitán na loď a jedna loď na hráče.
+- Počet přijatých hráčů nemá pevný limit. Nejvýše 12 lodí, jeden kapitán na loď a jedna loď na hráče.
 - Český jazyk rozhraní. Kód, identifikátory a názvy testů mohou být anglicky.
 - Žádný účet, veřejný seznam flotil, vlastní cloud, povinný STUN/TURN, služba pro zjišťování veřejné IP, telemetrie ani předplatné.
 - Přímé spojení na ručně předanou adresu. Automatické nastavení routeru je pokus, nikoli záruka dosažitelnosti.
@@ -80,7 +80,7 @@ Všechny změny flotily zpracuje jeden serializovaný hostitelský dispatcher. A
 
 - Přezdívka: 2 až 24 Unicode textových prvků po oříznutí mezer a normalizaci NFC. Bez řídicích znaků. Duplicitní jméno porovnané `OrdinalIgnoreCase` se odmítne; nepřebírá cizí identitu.
 - Název lodi: 1 až 32 textových prvků; model lodi 0 až 48; flotila 1 až 40. Zachovat českou diakritiku.
-- Do 12 míst se počítá hostitel i dočasně rezervovaní odpojení členové. Nejvýše 8 čekajících žádostí a 24 současných řídicích spojení včetně rozjednaných.
+- Nejvýše 8 čekajících žádostí a 24 současně rozjednaných řídicích spojení. Po přijetí se místo pro další žádost uvolní.
 - Odpojený člen se rezervuje nejvýše 120 sekund. Do té doby může obnovit členství tokenem, i když prvních 15 sekund automatických pokusů již skončilo.
 - Dobrovolný odchod, vyřazení hostitelem, uplynutí rezervace a konec relace token zneplatní. Obnovení nikdy nevychází jen z přezdívky.
 - Platný token při stále aktivním původním spojení vrátí `ALREADY_CONNECTED`. Nepřepisuje živého hráče. Po detekci skutečného výpadku lze obnovit jedno spojení.
@@ -223,7 +223,7 @@ Mutace jsou idempotentní podle `id`. Host uchová posledních 64 výsledků na 
 | Typ a směr | Tělo a význam |
 |---|---|
 | `ClientHello` C do H | `protocolVersion`, `appVersion`, `nickname`, `resumeSessionId?`, `resumeToken?`. Žádná klientem určovaná role. |
-| `ServerHello` H do C | `protocolVersion`, `appVersion`, `sessionId`, `fleetName`, `capacity=12`. Před přijetím bez seznamu členů. |
+| `ServerHello` H do C | `protocolVersion`, `appVersion`, `sessionId`, `fleetName`, `capacity=0 (bez pevného limitu)`. Před přijetím bez seznamu členů. |
 | `AdmissionPending` H do C | `expiresInSeconds=60`. UI čekání. |
 | `Accepted` H do C | `memberId`, `connectionId`, `resumeToken`, `udpKeyC2H`, `udpKeyH2C`, `noncePrefixC2H`, `noncePrefixH2C`, `snapshot`. Každé TLS obnovení vydá nové UDP údaje. |
 | `Rejected` H do C | `code`, poté ukončení. Například FULL, DENIED, NAME_IN_USE, VERSION_MISMATCH, RESUME_INVALID. |
@@ -452,7 +452,7 @@ Ve stejném nastavení přidat dole samostatnou část `Pro vývoj` s přepína�
 | `INVALID_ADDRESS` | Adresa není platná. Vlož znovu celé připojení od hostitele. Pole zůstane opravitelné. |
 | `HOST_UNREACHABLE` | Hostitel neodpovídá. Ověř, že má spuštěné hostování. Zkusit znovu / Upravit adresu. |
 | `NAME_IN_USE` | Tuto přezdívku už někdo používá. Zvol jinou. |
-| `FULL` | Flotila je plná. Může být připojeno nejvýše 12 hráčů. |
+| `FULL` | Operace by překročila kapacitu flotily. |
 | `VERSION_MISMATCH` | Máte rozdílné verze aplikace. Získej stejnou verzi jako hostitel. |
 | `DENIED` | Hostitel připojení nepřijal. Zpět na připojení. |
 | `VOICE_UNAVAILABLE` | Hlasové spojení se nepodařilo navázat. Zkusit hlas znovu / Podrobnosti. |
@@ -573,7 +573,7 @@ ID v této kapitole jsou stabilní. `A` znamená automatický test; `W` vyžaduj
 |---|---|---|
 | AUTH-001 | A | Nepřijatý klient, podvržené memberId nebo známá přezdívka kapitána. Žádné převzetí identity, role ani hlasu. |
 | AUTH-002 | A | Neplatný nebo staré relaci patřící resume token. Odmítnutí; platný token při živém spojení neukradne aktivního hráče. |
-| AUTH-003 | A | Přijmout 12 členů včetně hostitele, současně zkusit dvě další přijetí. Kapacita se nikdy nepřekročí. |
+| AUTH-003 | A | Přijmout 24 členů včetně hostitele a současně přijmout další dva. Všech 26 má aktivní hlasové spojení. |
 | TLS-001 | A/W | Shodný pin, chybný pin, změněný uložený pin, expirovaný certifikát a první holá IP. Jen přípustné případy dokončí připojení, žádný accept-all. |
 | TCP-001 | A | Frame po jednom bajtu, více framů najednou, nulová a nadlimitní délka, vadné UTF-8/JSON, neznámý typ. Správné čtení nebo řízené odmítnutí bez pádu. |
 | TCP-002 | A | Opakovat mutation id, ztratit odpověď, poslat starou epochu. Nejvýše jedna změna; klient načte aktuální snapshot. |

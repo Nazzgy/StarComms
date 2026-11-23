@@ -13,3 +13,7 @@ Každý přijatý hráč může založit loď z přehledu flotily. Hostitel zpra
 Přijatý hráč smí sám obsadit volné místo kapitána své lodi. Hostitel kontroluje členství, epochu a volné místo při zpracování žádosti. Při souběhu uspěje první platná žádost.
 
 Katalog modelů je vložen do EXE. Výběr vychází z průniku kategorií https://starcitizen.tools/Category:Ships a https://starcitizen.tools/Category:Flight_ready načtených 22. 11. 2026, s vynecháním pozemního HoverQuadu. Textové pole zachovává ruční typy a starší šablony.
+
+Jazyk se volí při prvním spuštění. Samostatné EXE vytváří vedle sebe volitelný CFG s jedním řádkem language=cs nebo language=en. Konfigurace není součástí distribuce. Pokud složka neumožňuje zápis, zvolený jazyk platí pro dané spuštění a uživatel dostane vysvětlení.
+
+Celý profil se ukládá atomicky do StarComms.cfg vedle EXE. Při prvním přechodu aplikace jednorázově načte dřívější profil. Původní soubory ponechá jako zálohu. Identita zůstává chráněná pomocí Windows DPAPI. Diagnostické logy podle přepínače Logs on jsou samostatné soubory vedle EXE.

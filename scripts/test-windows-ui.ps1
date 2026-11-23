@@ -16,6 +16,10 @@ $start.UseShellExecute = $false
 $profilePath = Join-Path $runRoot 'profil'
 $start.ArgumentList.Add('--test-profile')
 $start.ArgumentList.Add($profilePath)
+New-Item -ItemType Directory -Path $profilePath | Out-Null
+Set-Content -LiteralPath (Join-Path $profilePath 'settings.json') -Value '{"nickname":"Legacy pilot"}'
+Set-Content -LiteralPath (Join-Path $profilePath 'fleet-template.json') -Value '{"fleetName":"Legacy fleet","ships":[]}'
+Set-Content -LiteralPath (Join-Path $profilePath 'trusted-hosts.json') -Value '{}'
 $p = [Diagnostics.Process]::Start($start)
 function FindControl([string]$type,[string]$name) {
     $timer = [Diagnostics.Stopwatch]::StartNew()
@@ -42,6 +46,24 @@ function InvokeButton([string]$name) {
     $control.GetCurrentPattern([Windows.Automation.InvokePattern]::Pattern).Invoke()
 }
 try {
+    InvokeButton 'English'
+    $null = FindControl Button 'Connect'
+    $cfg = Join-Path $root 'StarComms.cfg'
+    if ((Get-Content -LiteralPath $cfg) -notcontains 'language=en') { throw 'Expected English beside the EXE' }
+    $p.CloseMainWindow() | Out-Null
+    if (!$p.WaitForExit(6000)) { throw 'English shutdown timed out' }
+    $p = [Diagnostics.Process]::Start($start)
+    InvokeButton 'Audio and settings'
+    $null = FindControl Button 'Test sound'
+    InvokeButton 'Done'
+    $null = FindControl Button 'Connect'
+    $p.CloseMainWindow() | Out-Null
+    if (!$p.WaitForExit(6000)) { throw 'Restarted app failed to close' }
+    $contents = [IO.File]::ReadAllText($cfg)
+    if ($contents -notmatch '(?m)^trusted-hosts=' -or $contents -notmatch '(?m)^fleet-template=' -or $contents -notmatch 'Legacy pilot') { throw 'Missing migrated profile data' }
+    [IO.File]::WriteAllText($cfg, $contents.Replace('language=en','language=cs'))
+    $p = [Diagnostics.Process]::Start($start)
+    'PASS English first launch, restart and manual Czech selection'
     $null = FindControl Button 'Připojit'
     "PASS start screen from standalone EXE in a path containing spaces and accents"
     InvokeButton 'Zvuk a nastavení'
@@ -55,7 +77,7 @@ try {
     $commandMode.Select()
     InvokeButton 'Hotovo'
     $null = FindControl Button 'Připojit'
-    $saved = Get-Content (Join-Path $profilePath 'settings.json') -Raw | ConvertFrom-Json
+    $saved = ((Get-Content -LiteralPath $cfg) -match '^settings=') -replace '^settings=', '' | ConvertFrom-Json
     if ($saved.ActivationThresholdDb -ne -48) { throw 'Microphone threshold was not saved' }
     if ($saved.ShipAutomatic -ne $false -or $saved.CommandAutomatic -ne $true) { throw 'Voice modes not saved' }
     InvokeButton 'Zvuk a nastavení'
@@ -120,7 +142,10 @@ try {
         $null = FindControl Text 'Tvoje loď'
         $playerProfile = "$profilePath-player"
         $start.ArgumentList[1] = $playerProfile
-        if ($OtherBuild) { $start.FileName = $OtherBuild }
+        New-Item -ItemType Directory -Path $playerProfile | Out-Null
+        $start.FileName = Join-Path $playerProfile 'StarComms.exe'
+        Copy-Item -LiteralPath $(if ($OtherBuild) { $OtherBuild } else { $copy }) -Destination $start.FileName
+        Set-Content -LiteralPath (Join-Path $playerProfile 'StarComms.cfg') -Value 'language=cs'
         $player = [Diagnostics.Process]::Start($start)
         try {
             $p = $player

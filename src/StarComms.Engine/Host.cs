@@ -37,7 +37,7 @@ public sealed class Host : IAsyncDisposable
     readonly Dictionary<ulong, Peer> peers = [];
     readonly Dictionary<uint, Reservation> reservations = [];
     readonly Dictionary<Guid, (Admission Info, TaskCompletionSource<bool> Reply)> pending = [];
-    int connections;
+    int handshakes;
     public Fleet Fleet { get; }
     public int Port { get; private set; }
     public string Fingerprint => Certificates.Fingerprint(certificate);
@@ -98,7 +98,7 @@ public sealed class Host : IAsyncDisposable
     {
         try { while (!stop.IsCancellationRequested) {
             var tcp = await listener.AcceptTcpClientAsync(stop.Token);
-            if (Interlocked.Increment(ref connections) > 24) { Interlocked.Decrement(ref connections); tcp.Dispose(); continue; }
+            if (Interlocked.Increment(ref handshakes) > 24) { Interlocked.Decrement(ref handshakes); tcp.Dispose(); continue; }
             var task = Serve(tcp, udp); lock (tasks) { tasks.RemoveAll(t => t.IsCompleted); tasks.Add(task); }
         } } catch (Exception e) when (e is OperationCanceledException or SocketException or ObjectDisposedException) { }
     }
@@ -112,7 +112,7 @@ public sealed class Host : IAsyncDisposable
     }
     async Task Serve(TcpClient tcp, Socket udp)
     {
-        Peer? peer = null; Guid pendingId = Guid.Empty; bool leave = false;
+        Peer? peer = null; Guid pendingId = Guid.Empty; bool leave = false; bool handshakePending = true;
         try {
             using (tcp) {
                 tcp.NoDelay = true; using var tls = new SslStream(tcp.GetStream(), false);
@@ -138,7 +138,7 @@ public sealed class Host : IAsyncDisposable
                 } else {
                     var name = Fleet.Text(hello.Nickname, 2, 24);
                     var reply = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously); pendingId = Guid.NewGuid();
-                    lock (Fleet.Sync) { if (pending.Count >= 8) throw new RuleException("FULL"); pending.Add(pendingId, (new(pendingId, name), reply)); Changed?.Invoke(); }
+                    lock (Fleet.Sync) { if (pending.Count >= 8) throw new RuleException("ADMISSION_BUSY"); pending.Add(pendingId, (new(pendingId, name), reply)); Changed?.Invoke(); }
                     link.Send("AdmissionPending", new { expiresInSeconds = 60 });
                     using (var waiting = CancellationTokenSource.CreateLinkedTokenSource(stop.Token)) {
                         // A canceled/disconnected applicant must not occupy a pending slot until the full timeout.
@@ -156,7 +156,9 @@ public sealed class Host : IAsyncDisposable
                     pending.Remove(pendingId);
                     ulong id; do { id = BinaryPrimitives.ReadUInt64BigEndian(RandomNumberGenerator.GetBytes(8)); } while (id == 0 || peers.ContainsKey(id));
                     var accepted = new Accepted(member.MemberId, id, token, RandomNumberGenerator.GetBytes(32), RandomNumberGenerator.GetBytes(32), RandomNumberGenerator.GetBytes(4), RandomNumberGenerator.GetBytes(4), Fleet.Snapshot);
-                    peer = new(accepted, link, udp); peers.Add(id, peer); link.Send("Accepted", accepted); Broadcast();
+                    peer = new(accepted, link, udp); peers.Add(id, peer);
+                    handshakePending = false; Interlocked.Decrement(ref handshakes);
+                    link.Send("Accepted", accepted); Broadcast();
                 }
                 var rate = new RateGate(20, 40); var pingRate = new RateGate(2, 8);
                 var results = new Dictionary<Guid, (long Time, Envelope Result)>();
@@ -214,7 +216,8 @@ public sealed class Host : IAsyncDisposable
                 }
                 Broadcast();
             }
-            Interlocked.Decrement(ref connections); tcp.Dispose();
+            if (handshakePending) Interlocked.Decrement(ref handshakes);
+            tcp.Dispose();
         }
     }
     bool ValidSender(Peer p, uint sender, uint epoch, VoiceChannel channel, uint ship)
