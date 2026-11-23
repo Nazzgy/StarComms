@@ -31,3 +31,9 @@ jobs:
             { cat intro.md; echo; cat notes.md; } > updated.md
             gh api --method PATCH "$endpoint" -F body=@updated.md --silent
           fi
+          gh api "$endpoint" --jq .body > notes.md
+          if ! grep -Fq 'Flotilu hostuje jeden z hráčů' notes.md; then
+            awk '/^StarComms 1\.0 \(/ {print "Flotilu hostuje jeden z hráčů přímo ve StarComms na svém PC. V aplikaci vybere **Chci hostovat** a pošle ostatním pozvánku. Ti ji vloží do StarComms a připojí se. Samostatný server skupina nepotřebuje."; print ""} {print}' notes.md > updated.md
+            grep -Fq 'Flotilu hostuje jeden z hráčů' updated.md
+            gh api --method PATCH "$endpoint" -F body=@updated.md --silent
+          fi
