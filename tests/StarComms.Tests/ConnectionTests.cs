@@ -138,7 +138,10 @@ public sealed class ConnectionTests
             var server = new IPEndPoint(IPAddress.Loopback, host.Port);
             try {
                 while (!cancel.IsCancellationRequested) {
-                    var packet = await udp.ReceiveAsync(cancel.Token);
+                    UdpReceiveResult packet;
+                    try { packet = await udp.ReceiveAsync(cancel.Token); }
+                    // Windows reports ICMP port-unreachable when the pilot replaces its UDP socket.
+                    catch (SocketException e) when (e.SocketErrorCode == SocketError.ConnectionReset) { continue; }
                     var fromHost = packet.RemoteEndPoint.Equals(server);
                     if (!fromHost) remote = packet.RemoteEndPoint;
                     if (remote != null) await udp.SendAsync(packet.Buffer, fromHost ? remote : server, cancel.Token);
