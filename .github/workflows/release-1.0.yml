@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: e0989dc4f297cb33a02dea26b81851651aadc02c
+          ref: 4c5cd74206777458a7394adccc5a4c164d4794a4
           persist-credentials: false
       - uses: actions/setup-dotnet@v4
         with:
