@@ -1,0 +1,33 @@
+name: StarComms 1.0
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/release-1.0.yml']
+permissions:
+  contents: write
+concurrency: release-v1.0
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: e0989dc4f297cb33a02dea26b81851651aadc02c
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - name: Build, test and publish Windows x64
+        shell: pwsh
+        run: ./scripts/publish.ps1
+      - name: Create release draft with portable EXE
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $hash = (Get-FileHash artifacts/StarComms.exe -Algorithm SHA256).Hash
+          $notes = ((Get-Content CHANGELOG.md -Raw -Encoding utf8) -split '(?m)^## ')[1].Trim()
+          $notes += "`n`nSHA-256 (StarComms.exe): $hash"
+          $notes | Set-Content release-notes.md -Encoding utf8
+          gh release create v1.0 artifacts/StarComms.exe --repo "$env:GITHUB_REPOSITORY" --draft --title "StarComms 1.0" --target (git rev-parse HEAD) --notes-file release-notes.md
